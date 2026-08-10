@@ -9,37 +9,30 @@ const DECO = {
   LINE_DASHED: '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄',
   LINE_DOTTED: '┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈',
   LINE_WAVE: '﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏',
-
+  
   ARROW_RIGHT: '▸',
   ARROW_DOUBLE: '»',
   ARROW_FANCY: '↯',
   ARROW_DIAMOND: '◆',
   ARROW_TRIANGLE: '▶',
   ARROW_STAR: '⟡',
-
+  
   BULLET: '•',
   BULLET_DIAMOND: '◆',
   BULLET_STAR: '★',
   BULLET_ARROW: '↳',
-
+  
   BRACKET_LEFT: '【',
   BRACKET_RIGHT: '】',
   BRACKET_FANCY_LEFT: '〔',
   BRACKET_FANCY_RIGHT: '〕',
   BRACKET_CORNER_LEFT: '「',
   BRACKET_CORNER_RIGHT: '」',
-
+  
   BLOCK_FULL: '█',
   BLOCK_HALF: '▓',
   BLOCK_LIGHT: '▒',
   BLOCK_GHOST: '░',
-};
-
-// Fuentes fancy para textos especiales
-const FONT = {
-  title: (text) => text, // Usaremos las fuentes directamente en los mensajes
-  subtitle: (text) => text,
-  value: (text) => text,
 };
 
 // ─── Funciones Helper ───────────────────────────────────────────────────────
@@ -52,17 +45,87 @@ const header = (title, subtitle = '') => {
   return result;
 };
 
-const section = (icon, title) =>
+const section = (icon, title) => 
   `${icon} ${title} ${DECO.ARROW_FANCY}`;
 
-const field = (icon, label, value) =>
+const field = (icon, label, value) => 
   `${DECO.BULLET_ARROW} ${label}: ${value}`;
-
-const statusField = (icon, label, value, badge) =>
-  `${DECO.BULLET_ARROW} ${label}: ${badge} // ${value}`;
 
 const footer = (text) =>
   `${DECO.LINE_WAVE}\n${text}`;
+
+// ─── Lógica de Estado VIP (Cálculos Dinámicos) ─────────────────────────────
+
+function calcDaysRemaining(planExpiry) {
+  if (!planExpiry) return 0;
+  const now = Date.now();
+  const diff = planExpiry - now;
+  return Math.max(0, Math.ceil(diff / 86400000));
+}
+
+function buildProgressBar(daysRemaining, totalDays) {
+  const maxBlocks = 10;
+  if (totalDays <= 0) return `${DECO.BLOCK_GHOST.repeat(maxBlocks)} 0%`;
+  const ratio = Math.min(daysRemaining / totalDays, 1);
+  const filled = Math.round(ratio * maxBlocks);
+  const empty = maxBlocks - filled;
+  const pct = Math.round(ratio * 100);
+  return `${DECO.BLOCK_FULL.repeat(filled)}${DECO.BLOCK_GHOST.repeat(empty)} ${pct}%`;
+}
+
+function getVipBadge(status, user) {
+  if (status.isOwner) {
+    return `${EMOJI.CROWN} 𝑶𝑾𝑵𝑬𝑹 ${DECO.BRACKET_FANCY_LEFT} Acceso Ilimitado ${DECO.BRACKET_FANCY_RIGHT}`;
+  }
+  if (status.hasPlan) {
+    const days = calcDaysRemaining(user.planExpiry);
+    if (days > 15) {
+      return `${EMOJI.CHECK} 𝑨𝑪𝑻𝑰𝑽𝑶 ${DECO.BRACKET_FANCY_LEFT} ${days} días restantes ${DECO.BRACKET_FANCY_RIGHT}`;
+    } else if (days > 3) {
+      return `${EMOJI.WARNING} 𝑨𝑪𝑻𝑰𝑽𝑶 ${DECO.BRACKET_FANCY_LEFT} ${days} días restantes ${DECO.BRACKET_FANCY_RIGHT}`;
+    } else {
+      return `${EMOJI.RED} 𝑷𝑶𝑹 𝑬𝑿𝑷𝑰𝑹𝑨𝑹 ${DECO.BRACKET_FANCY_LEFT} ${days} días restantes ${DECO.BRACKET_FANCY_RIGHT}`;
+    }
+  }
+  return `${EMOJI.CROSS} 𝑰𝑵𝑨𝑪𝑻𝑰𝑽𝑶 ${DECO.BRACKET_FANCY_LEFT} Sin plan activo ${DECO.BRACKET_FANCY_RIGHT}`;
+}
+
+function getSubscriptionBlock(status, user) {
+  if (status.isOwner) {
+    return (
+      `${section(EMOJI.CROWN, '𝑬𝑺𝑻𝑨𝑫𝑶 𝑽𝑰𝑷')}\n` +
+      `${DECO.BULLET_ARROW} ${EMOJI.CROWN} 𝚁𝚊𝚗𝚐𝚘: 𝑶𝑾𝑵𝑬𝑹\n` +
+      `${DECO.BULLET_ARROW} ${EMOJI.CHECK} 𝙴𝚜𝚝𝚊𝚍𝚘: 𝑨𝒄𝒄𝒆𝒔𝒐 𝑰𝒍𝒊𝒎𝒊𝒕𝒂𝒅𝒐\n` +
+      `${DECO.BULLET_ARROW} ${EMOJI.DIAMOND} 𝙿𝚕𝚊𝚗: ${EMOJI.GREEN} Permanente\n` +
+      `${DECO.BULLET_ARROW} ${DECO.BLOCK_FULL.repeat(10)} 100%`
+    );
+  }
+  if (status.hasPlan) {
+    const days = calcDaysRemaining(user.planExpiry);
+    const totalDays = user.planExpiry && user.createdAt
+      ? Math.ceil((user.planExpiry - (user.createdAt || Date.now())) / 86400000)
+      : days;
+    const expDate = new Date(user.planExpiry).toLocaleDateString('es-MX', {
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    });
+    const bar = buildProgressBar(days, Math.max(totalDays, days));
+    const urgency = days <= 3 ? EMOJI.RED : days <= 15 ? EMOJI.WARNING : EMOJI.GREEN;
+    
+    return (
+      `${section(EMOJI.DIAMOND, '𝑬𝑺𝑻𝑨𝑫𝑶 𝑽𝑰𝑷')}\n` +
+      `${DECO.BULLET_ARROW} ${EMOJI.CHECK} 𝙴𝚜𝚝𝚊𝚍𝚘: 𝑨𝑪𝑻𝑰𝑽𝑶\n` +
+      `${DECO.BULLET_ARROW} ${EMOJI.CALENDAR} 𝙴𝚡𝚙𝚒𝚛𝚊: ${expDate}\n` +
+      `${DECO.BULLET_ARROW} ${urgency} 𝙳í𝚊𝚜 𝚛𝚎𝚜𝚝𝚊𝚗𝚝𝚎𝚜: ${days}\n` +
+      `${DECO.BULLET_ARROW} ${bar}`
+    );
+  }
+  return (
+    `${section(EMOJI.WARNING, '𝑬𝑺𝑻𝑨𝑫𝑶 𝑫𝑬 𝑺𝑼𝑺𝑪𝑹𝑰𝑷𝑪𝑰Ó𝑵')}\n` +
+    `${DECO.BULLET_ARROW} ${EMOJI.CROSS} 𝙴𝚜𝚝𝚊𝚍𝚘: 𝑰𝑵𝑨𝑪𝑻𝑰𝑽𝑶\n` +
+    `${DECO.BULLET_ARROW} ${EMOJI.RED} 𝙿𝚕𝚊𝚗: Sin plan VIP activo\n` +
+    `${DECO.BULLET_ARROW} ${DECO.BLOCK_GHOST.repeat(10)} 0%`
+  );
+}
 
 // ─── Plantillas Premium ─────────────────────────────────────────────────────
 
@@ -75,8 +138,7 @@ export function renderStartVipMessage(user, chatId, status) {
     `${field(EMOJI.STAR, '𝙽𝚘𝚖𝚋𝚛𝚎', user.name)}\n` +
     `${field(EMOJI.TAG, '𝙸𝙳 𝚃𝚎𝚕𝚎𝚐𝚛𝚊𝚖', chatId)}\n` +
     `${field(EMOJI.CHAT, '𝚄𝚜𝚞𝚊𝚛𝚒𝚘', user.username || 'Sin Username')}\n\n` +
-    `${section(EMOJI.DIAMOND, '𝑬𝑺𝑻𝑨𝑫𝑶 𝑽𝑰𝑷')}\n` +
-    `${field(EMOJI.STAR, '𝙼𝚎𝚖𝚋𝚛𝚎𝚜í𝚊', `${EMOJI.CHECK} ${status.label}`)}\n\n` +
+    `${getSubscriptionBlock(status, user)}\n\n` +
     `${DECO.LINE_DASHED}\n\n` +
     `${EMOJI.PIN} ${DECO.ARROW_DIAMOND} 𝑪𝑶𝑴𝑨𝑵𝑫𝑶𝑺 𝑹𝑨𝑷𝑰𝑫𝑶𝑺\n` +
     `${DECO.BULLET_ARROW} ${EMOJI.ARROW} /extension — Descargar paquete .zip\n` +
@@ -87,6 +149,7 @@ export function renderStartVipMessage(user, chatId, status) {
 }
 
 export function renderStartNoPlanMessage(user, chatId) {
+  const noStatus = { hasPlan: false, isOwner: false };
   return (
     `${header('𝑪𝑶𝑫𝑬𝑿® 𝑺𝒀𝑺𝑻𝑬𝑴', 'ᴘʟᴀᴛᴀғᴏʀᴍᴀ ᴅᴇ ᴄᴏɴᴛʀᴏʟ')}\n\n` +
     `${EMOJI.SPARKLES} ${DECO.ARROW_TRIANGLE} ¡𝑯𝒐𝒍𝒂, ${user.name}!\n` +
@@ -96,8 +159,7 @@ export function renderStartNoPlanMessage(user, chatId) {
     `${field(EMOJI.TAG, '𝙸𝙳 𝚃𝚎𝚕𝚎𝚐𝚛𝚊𝚖', chatId)}\n` +
     `${field(EMOJI.CHAT, '𝚄𝚜𝚞𝚊𝚛𝚒𝚘', user.username || 'Sin Username')}\n\n` +
     `${DECO.LINE_DOUBLE}\n\n` +
-    `${section(EMOJI.WARNING, '𝑬𝑺𝑻𝑨𝑫𝑶 𝑫𝑬 𝑺𝑼𝑺𝑪𝑹𝑰𝑷𝑪𝑰Ó𝑵')}\n` +
-    `${DECO.BULLET_ARROW} ${EMOJI.CROSS} 𝚂𝙸𝙽 𝙿𝙻𝙰𝙽 𝚅𝙸𝙿 𝙰𝙲𝚃𝙸𝚅𝙾\n\n` +
+    `${getSubscriptionBlock(noStatus, user)}\n\n` +
     `${DECO.LINE_DOTTED}\n\n` +
     `${EMOJI.LOCK} ${DECO.ARROW_DIAMOND} 𝑨𝑪𝑪𝑬𝑺𝑶 𝑹𝑬𝑺𝑻𝑹𝑰𝑵𝑮𝑰𝑫𝑶\n` +
     `${DECO.BULLET_ARROW} Para acceder a la extensión CODEX® y generar\n` +
@@ -110,7 +172,8 @@ export function renderStartNoPlanMessage(user, chatId) {
 export function renderProfileMessage(user, chatId, status, expDateStr, isOwnerUser) {
   const rankIcon = isOwnerUser ? EMOJI.CROWN : EMOJI.SHIELD;
   const rankText = isOwnerUser ? '𝑶𝑾𝑵𝑬𝑹 (𝑰𝒍𝒊𝒎𝒊𝒕𝒂𝒅𝒐)' : user.role.toUpperCase();
-
+  const vipBadge = getVipBadge(status, user);
+  
   return (
     `${header('𝑪𝑶𝑫𝑬𝑿® 𝑷𝑨𝑵𝑬𝑳', 'ᴘᴇʀғɪʟ ᴅᴇ ᴏᴘᴇʀᴀᴅᴏʀ')}\n\n` +
     `${EMOJI.SPARKLES} ${user.name} — ${DECO.BRACKET_FANCY_LEFT} 𝙿𝚎𝚛𝚏𝚒𝚕 𝙳𝚎𝚝𝚊𝚕𝚕𝚊𝚍𝚘 ${DECO.BRACKET_FANCY_RIGHT}\n` +
@@ -119,15 +182,17 @@ export function renderProfileMessage(user, chatId, status, expDateStr, isOwnerUs
     `${field(EMOJI.PIN, '𝙽𝚘𝚖𝚋𝚛𝚎', user.name)}\n` +
     `${field(EMOJI.TAG, '𝚃𝚎𝚕𝚎𝚐𝚛𝚊𝚖 𝙸𝙳', chatId)}\n` +
     `${field(EMOJI.CHAT, '𝙷𝚊𝚗𝚍𝚕𝚎', user.username || 'Sin @')}\n\n` +
-    `${section(EMOJI.SHIELD, '𝑬𝑺𝑻𝑨𝑫𝑶 𝒀 𝑳𝑰𝑪𝑬𝑵𝑪𝑰𝑨')}\n` +
+    `${getSubscriptionBlock(status, user)}\n\n` +
+    `${DECO.LINE_THIN}\n\n` +
+    `${section(EMOJI.SHIELD, '𝑳𝑰𝑪𝑬𝑵𝑪𝑰𝑨')}\n` +
     `${field(rankIcon, '𝚁𝚊𝚗𝚐𝚘', rankText)}\n` +
-    `${field(EMOJI.LOCK, '𝙴𝚜𝚝𝚊𝚍𝚘 𝚅𝙸𝙿', status.hasPlan ? `${EMOJI.CHECK} ACTIVO` : `${EMOJI.CROSS} INACTIVO`)}\n` +
+    `${DECO.BULLET_ARROW} 𝚅𝙸𝙿: ${vipBadge}\n` +
     `${field(EMOJI.CALENDAR, '𝙴𝚡𝚙𝚒𝚛𝚊𝚌𝚒ó𝚗', expDateStr)}\n\n` +
     `${DECO.LINE_DOUBLE}\n\n` +
     `${EMOJI.LIGHTNING} ${DECO.ARROW_DIAMOND} 𝑪Ó𝑫𝑰𝑮𝑶 𝑫𝑬 𝑨𝑪𝑪𝑬𝑺𝑶\n` +
     `${DECO.BULLET_ARROW} Tu ID de acceso es: ${EMOJI.LOCK} ${chatId}\n\n` +
     `${DECO.LINE_THIN}\n` +
-    `${EMOJI.INFO} Ingresa tu ID en el panel de la extensión CODEX® para iniciar sesión.\n\n` +
+    `${EMOJI.INFO} Ingresa tu ID en la extensión CODEX® para iniciar sesión.\n\n` +
     `${footer(`${EMOJI.LOCK} 𝑪𝑶𝑫𝑬𝑿® • 𝑺𝒆𝒈𝒖𝒓𝒊𝒅𝒂𝒅 𝑮𝒂𝒓𝒂𝒏𝒕𝒊𝒛𝒂𝒅𝒂`)}`
   );
 }
@@ -142,7 +207,8 @@ export function renderVipGrantedOwnerMessage(user, daysNum, expDateStr) {
     `${field(EMOJI.TAG, '𝚃𝚎𝚕𝚎𝚐𝚛𝚊𝚖 𝙸𝙳', user.telegramId)}\n\n` +
     `${section(EMOJI.STAR, '𝑳𝑰𝑪𝑬𝑵𝑪𝑰𝑨 𝑪𝑶𝑵𝑪𝑬𝑫𝑰𝑫𝑨')}\n` +
     `${field(EMOJI.PLUS, '𝙳í𝚊𝚜 𝙰𝚐𝚛𝚎𝚐𝚊𝚍𝚘𝚜', `+${daysNum} Días`)}\n` +
-    `${field(EMOJI.CALENDAR, '𝙽𝚞𝚎𝚟𝚊 𝙴𝚡𝚙𝚒𝚛𝚊𝚌𝚒ó𝚗', expDateStr)}\n\n` +
+    `${field(EMOJI.CALENDAR, '𝙽𝚞𝚎𝚟𝚊 𝙴𝚡𝚙𝚒𝚛𝚊𝚌𝚒ó𝚗', expDateStr)}\n` +
+    `${DECO.BULLET_ARROW} ${EMOJI.GREEN} 𝙿𝚛𝚘𝚐𝚛𝚎𝚜𝚘: ${DECO.BLOCK_FULL.repeat(10)} 100%\n\n` +
     `${footer(`${EMOJI.CROWN} 𝑶𝒕𝒐𝒓𝒈𝒂𝒅𝒐 𝒑𝒐𝒓 𝑪𝑶𝑫𝑬𝑿® 𝑨𝒅𝒎𝒊𝒏𝒊𝒔𝒕𝒓𝒂𝒅𝒐𝒓`)}`
   );
 }
@@ -153,7 +219,8 @@ export function renderVipGrantedUserMessage(daysNum, expDateStr, telegramId) {
     `${DECO.LINE_THICK}\n\n` +
     `${EMOJI.DIAMOND} ${DECO.ARROW_TRIANGLE} 𝚃𝚞 𝙿𝚕𝚊𝚗 𝚅𝙸𝙿 𝚑𝚊 𝚜𝚒𝚍𝚘 𝚊𝚌𝚝𝚒𝚟𝚊𝚍𝚘\n\n` +
     `${EMOJI.SPARKLES} El administrador te ha otorgado:\n` +
-    `${DECO.BULLET_ARROW} ${EMOJI.FIRE} ${daysNum} días de membresía premium\n\n` +
+    `${DECO.BULLET_ARROW} ${EMOJI.FIRE} ${daysNum} días de membresía premium\n` +
+    `${DECO.BULLET_ARROW} ${EMOJI.GREEN} 𝙿𝚛𝚘𝚐𝚛𝚎𝚜𝚘: ${DECO.BLOCK_FULL.repeat(10)} 100%\n\n` +
     `${section(EMOJI.CALENDAR, '𝑰𝑵𝑭𝑶𝑹𝑴𝑨𝑪𝑰Ó𝑵 𝑰𝑴𝑷𝑶𝑹𝑻𝑨𝑵𝑻𝑬')}\n` +
     `${field(EMOJI.CALENDAR, '𝙵𝚎𝚌𝚑𝚊 𝙴𝚡𝚙𝚒𝚛𝚊𝚌𝚒ó𝚗', expDateStr)}\n` +
     `${field(EMOJI.LOCK, '𝙲ó𝚍𝚒𝚐𝚘 𝙰𝚌𝚌𝚎𝚜𝚘', telegramId)}\n\n` +
@@ -199,7 +266,7 @@ export function renderExtensionCaption(user, status, zipSize, chatId) {
 }
 
 export function renderHelpMessage(isOwnerUser) {
-  let text =
+  let text = 
     `${header('𝑪𝑶𝑫𝑬𝑿® 𝑨𝒀𝑼𝑫𝑨', 'ᴄᴇɴᴛʀᴏ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs')}\n\n` +
     `${section(EMOJI.ARROW, '𝑪𝑶𝑴𝑨𝑵𝑫𝑶𝑺 𝑮𝑬𝑵𝑬𝑹𝑨𝑳𝑬𝑺')}\n` +
     `${DECO.BULLET_ARROW} /start — ${DECO.BRACKET_FANCY_LEFT} Registrar identidad ${DECO.BRACKET_FANCY_RIGHT}\n` +
@@ -223,6 +290,6 @@ export function renderHelpMessage(isOwnerUser) {
     `${DECO.LINE_WAVE}\n` +
     `${EMOJI.CHAT} ¿Dudas o soporte? Contacta a nuestros Administradores.\n\n` +
     `${footer(`${EMOJI.LOCK} 𝑪𝑶𝑫𝑬𝑿® 𝑺𝒚𝒔𝒕𝒆𝒎 • 𝑷𝒓𝒆𝒎𝒊𝒖𝒎 𝑺𝒆𝒄𝒖𝒓𝒊𝒕𝒚`)}`;
-
+  
   return text;
 }
