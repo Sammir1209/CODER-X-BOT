@@ -25,6 +25,8 @@ import FormData from 'form-data';
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ypqthyglthytkwcikczz.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlwcXRoeWdsdGh5dGt3Y2lrY3p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMTQwMzksImV4cCI6MjEwMTg5MDAzOX0.6V5xYGmzwJ_YJYAxFiYORewn5t3cggtS-dzSyFBlwuw';
 const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
