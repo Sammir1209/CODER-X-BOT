@@ -7,6 +7,7 @@ import {
   renderExtensionCaption,
   renderHelpMessage,
   renderProfileMessage,
+  renderRegisterMessage,
   renderStartNoPlanMessage,
   renderStartVipMessage,
   renderStatusMessage,
@@ -22,6 +23,25 @@ import {
   syncUserToSupabase
 } from '../database/userStore.mjs';
 import { sendDocument, sendMessage } from '../services/telegramApi.mjs';
+
+export async function handleRegister(msg) {
+  const chatId = String(msg.chat.id);
+  const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
+  const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
+  const username = from.username ? `@${from.username}` : '';
+
+  const usersBefore = loadUsersDb();
+  const alreadyRegistered = Boolean(usersBefore.find(u => u.telegramId === userId || (username && u.username && u.username.toLowerCase() === username.toLowerCase())));
+
+  const user = getOrRegisterUser(userId, { name, username });
+  const status = getVipStatus(user);
+
+  const isNew = !alreadyRegistered;
+  const keyboard = status.hasPlan ? getActivePlanKeyboard() : getNoPlanKeyboard();
+
+  await sendMessage(chatId, renderRegisterMessage(user, userId, isNew), keyboard);
+}
 
 export async function handleStart(msg) {
   const chatId = String(msg.chat.id);

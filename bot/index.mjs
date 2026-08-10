@@ -7,6 +7,7 @@ import {
   handleHelp,
   handleListUsersCommand,
   handleProfile,
+  handleRegister,
   handleRemoveVipCommand,
   handleStart,
   handleStatus,
@@ -31,6 +32,10 @@ export async function processUpdate(update) {
     switch (cmd) {
       case '/start':
         await handleStart(msg);
+        break;
+      case '/register':
+      case '/registro':
+        await handleRegister(msg);
         break;
       case '/me':
       case '/perfil':

@@ -227,11 +227,35 @@ export function renderExtensionCaption(user, status, zipSize, chatId) {
   );
 }
 
+export function renderRegisterMessage(user, userId, isNewRegistration = true) {
+  const status = getVipStatus(user);
+  return (
+    `${header('CODEX® REGISTRO', 'Base de Datos de Operadores')}\n` +
+    `\n` +
+    `${EMOJI.CHECK} <b>${isNewRegistration ? '¡Registro Completado con Éxito!' : '¡Ya te encuentras registrado!'}</b>\n` +
+    `${DECO.BULLET} <i>Tus datos han sido guardados en el servidor y Supabase.</i>\n` +
+    `${section(EMOJI.CHART, 'Datos Registrados')}` +
+    `${field('Nombre', `<b>${user.name}</b>`)}\n` +
+    `${field('Telegram ID', `<code>${userId}</code>`)}\n` +
+    `${field('Usuario', `<code>${user.username || 'Sin @'}</code>`)}\n` +
+    `${field('Rango', `<b>${user.role.toUpperCase()}</b>`)}\n` +
+    `${getSubscriptionBlock(status, user)}\n` +
+    `\n${DECO.LINE_THIN}\n` +
+    `\n` +
+    `${EMOJI.INFO} <b>Información</b> ${DECO.ARROW_FANCY}\n` +
+    `${DECO.BULLET} <i>El registro almacena tu identidad en el sistema.</i>\n` +
+    `${DECO.BULLET} <i>El acceso a la extensión CODEX® requiere una membresía VIP.</i>\n` +
+    `${DECO.BULLET} <i>Para adquirir VIP, contacta a nuestros Administradores.</i>\n` +
+    `\n${footer(`${EMOJI.LOCK} CODEX® System • Registro Oficial`)}`
+  );
+}
+
 export function renderHelpMessage(isOwnerUser) {
   let text =
     `${header('CODEX® AYUDA', 'Centro de Comandos')}\n` +
     `${section(EMOJI.INFO, 'Comandos Generales')}` +
-    `${DECO.BULLET} <b>/start</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Registrar identidad</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
+    `${DECO.BULLET} <b>/start</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Registrar o iniciar sesión</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
+    `${DECO.BULLET} <b>/register</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Registrar usuario en la base de datos</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
     `${DECO.BULLET} <b>/me</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Perfil y ID de acceso</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
     `${DECO.BULLET} <b>/extension</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Descargar extensión .zip</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
     `${DECO.BULLET} <b>/status</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Salud del servidor</i> ${DECO.BRACKET_CORNER_RIGHT}\n`;
