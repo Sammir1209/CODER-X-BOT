@@ -19,6 +19,7 @@ import { execSync } from 'child_process';
 import { createReadStream, existsSync, statSync, readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
 import FormData from 'form-data';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -602,6 +603,15 @@ async function main() {
     console.error('[BOT] No se pudo conectar a Telegram. Revisa el token:', me);
     process.exit(1);
   }
+
+  // ─── Health Check HTTP Server for Render / Railway / Heroku ──────────────
+  const PORT = process.env.PORT || 10000;
+  http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('CODEX(R) Telegram Bot Server Active\n');
+  }).listen(PORT, () => {
+    console.log(`   Health Check HTTP Server escuchando en puerto: ${PORT}`);
+  });
 
   console.log(`\n🚀 CODEX(R) Bot & VIP Manager iniciado`);
   console.log(`   Bot: @${me.result.username}`);
