@@ -101,12 +101,26 @@ export function saveUsersDb(users) {
 export function getOrRegisterUser(telegramId, userInfo = {}) {
   const users = loadUsersDb();
   const idStr = String(telegramId).trim();
+
+  const inputName = userInfo.name || '';
+  const inputUsername = userInfo.username
+    ? (userInfo.username.startsWith('@') ? userInfo.username : `@${userInfo.username}`)
+    : '';
+
+  // 1. Search by numeric Telegram ID
   let user = users.find((u) => u.telegramId === idStr);
 
-  const name = userInfo.name || user?.name || `User ${idStr}`;
-  const username = userInfo.username
-    ? (userInfo.username.startsWith('@') ? userInfo.username : `@${userInfo.username}`)
-    : (user?.username || '');
+  // 2. Fallback: Search by username if registered before /start (e.g. via /vip @user)
+  if (!user && inputUsername) {
+    const cleanInputUser = inputUsername.toLowerCase().replace('@', '');
+    user = users.find((u) => u.username && u.username.toLowerCase().replace('@', '') === cleanInputUser);
+    if (user) {
+      user.telegramId = idStr; // Bind real numeric ID
+    }
+  }
+
+  const name = inputName || user?.name || `User ${idStr}`;
+  const username = inputUsername || user?.username || '';
 
   if (!user) {
     user = {
@@ -123,10 +137,9 @@ export function getOrRegisterUser(telegramId, userInfo = {}) {
     let updated = false;
     if (name && user.name !== name) { user.name = name; updated = true; }
     if (username && user.username !== username) { user.username = username; updated = true; }
-    if (isOwner(idStr) && user.role !== 'owner') {
-      user.role = 'owner';
-      user.planExpiry = 4102444800000;
-      updated = true;
+    if (isOwner(idStr)) {
+      if (user.role !== 'owner') { user.role = 'owner'; updated = true; }
+      if (user.planExpiry !== 4102444800000) { user.planExpiry = 4102444800000; updated = true; }
     }
     if (updated) saveUsersDb(users);
   }
