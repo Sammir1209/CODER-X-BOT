@@ -260,6 +260,12 @@ const EMOJI = {
   CROSS:     '<tg-emoji emoji-id="5210952531676504517">❌</tg-emoji>',
   CHECK:     '<tg-emoji emoji-id="5206607081334906820">✔️</tg-emoji>',
   PARTY:     '<tg-emoji emoji-id="5461151367559141950">🎉</tg-emoji>',
+  TAG:       '<tg-emoji emoji-id="5222444124698853913">🔖</tg-emoji>',
+  DESKTOP:   '<tg-emoji emoji-id="5282843764451195532">🖥</tg-emoji>',
+  LINK:      '<tg-emoji emoji-id="5271604874419647061">🔗</tg-emoji>',
+  MONEY:     '<tg-emoji emoji-id="5409048419211682843">💵</tg-emoji>',
+  EYES:      '<tg-emoji emoji-id="5210956306952758910">👀</tg-emoji>',
+  FIRE:      '<tg-emoji emoji-id="5424972470023104089">🔥</tg-emoji>',
 };
 
 // ─── Standard Buttons ─────────────────────────────────────────────────────────
@@ -319,27 +325,27 @@ async function handleStart(msg) {
       `${EMOJI.SPARKLES} <b>¡Hola, ${user.name}!</b>\n` +
       `Tu identidad ha sido verificada en el servidor central.\n\n` +
       `${EMOJI.CHART} <b>DATOS DE TU CUENTA</b>\n` +
-      ` ├ 👤 <b>Nombre:</b> ${user.name}\n` +
-      ` ├ 🆔 <b>ID Telegram:</b> <code>${chatId}</code>\n` +
-      ` └ 💬 <b>Usuario:</b> ${user.username || 'Sin Username'}\n\n` +
+      ` ├ ${EMOJI.STAR} <b>Nombre:</b> ${user.name}\n` +
+      ` ├ ${EMOJI.TAG} <b>ID Telegram:</b> <code>${chatId}</code>\n` +
+      ` └ ${EMOJI.CHAT} <b>Usuario:</b> ${user.username || 'Sin Username'}\n\n` +
       `${EMOJI.DIAMOND} <b>ESTADO DE SUSCRIPCIÓN</b>\n` +
-      ` └ 🌟 <b>Membresía:</b> ${EMOJI.CHECK} <b>${status.label}</b>\n\n` +
+      ` └ ${EMOJI.STAR} <b>Membresía:</b> ${EMOJI.CHECK} <b>${status.label}</b>\n\n` +
       `${EMOJI.PIN} <b>COMANDOS RÁPIDOS:</b>\n` +
-      ` 🔹 /extension — Descargar paquete de extensión (.zip)\n` +
-      ` 🔹 /me — Ver tu perfil de acceso\n` +
-      ` 🔹 /help — Lista de comandos`,
+      ` ${EMOJI.ARROW} /extension — Descargar paquete de extensión (.zip)\n` +
+      ` ${EMOJI.ARROW} /me — Ver tu perfil de acceso\n` +
+      ` ${EMOJI.ARROW} /help — Lista de comandos`,
       getActivePlanKeyboard()
     );
   } else {
     await sendMessage(chatId,
       `${EMOJI.LIGHTNING} <b>CODEX(R) SYSTEM — PLATAFORMA DE CONTROL</b> ${EMOJI.LIGHTNING}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `👋 <b>¡Hola, ${user.name}!</b>\n` +
+      `${EMOJI.SPARKLES} <b>¡Hola, ${user.name}!</b>\n` +
       `Tu ID de Telegram ha sido registrado correctamente.\n\n` +
       `${EMOJI.CHART} <b>DATOS REGISTRADOS</b>\n` +
-      ` ├ 👤 <b>Nombre:</b> ${user.name}\n` +
-      ` ├ 🆔 <b>ID Telegram:</b> <code>${chatId}</code>\n` +
-      ` └ 💬 <b>Usuario:</b> ${user.username || 'Sin Username'}\n\n` +
+      ` ├ ${EMOJI.STAR} <b>Nombre:</b> ${user.name}\n` +
+      ` ├ ${EMOJI.TAG} <b>ID Telegram:</b> <code>${chatId}</code>\n` +
+      ` └ ${EMOJI.CHAT} <b>Usuario:</b> ${user.username || 'Sin Username'}\n\n` +
       `${EMOJI.WARNING} <b>ESTADO DE SUSCRIPCIÓN</b>\n` +
       ` └ ${EMOJI.CROSS} <b>SIN PLAN VIP ACTIVO</b>\n\n` +
       `${EMOJI.LOCK} <i>Para acceder a la extensión CODEX(R) y generar códigos OTP, adquiere un Plan VIP con nuestros Administradores.</i>`,
@@ -366,16 +372,16 @@ async function handleProfile(msg) {
   const text =
     `${EMOJI.DIAMOND} <b>CODEX(R) — PANEL DE PERFIL DE OPERADOR</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `👤 <b>INFORMACIÓN PERSONAL</b>\n` +
-    ` ├ 🪪 <b>Nombre:</b> ${user.name}\n` +
-    ` ├ 🆔 <b>Telegram ID:</b> <code>${chatId}</code>\n` +
-    ` └ 💬 <b>Handle:</b> ${user.username || 'Sin @'}\n\n` +
+    `${EMOJI.STAR} <b>INFORMACIÓN PERSONAL</b>\n` +
+    ` ├ ${EMOJI.PIN} <b>Nombre:</b> ${user.name}\n` +
+    ` ├ ${EMOJI.TAG} <b>Telegram ID:</b> <code>${chatId}</code>\n` +
+    ` └ ${EMOJI.CHAT} <b>Handle:</b> ${user.username || 'Sin @'}\n\n` +
     `${EMOJI.SHIELD} <b>ESTADO Y LICENCIA</b>\n` +
-    ` ├ 🌟 <b>Rango:</b> ${isOwner(user.telegramId) || user.role === 'owner' ? `${EMOJI.CROWN} OWNER (Ilimitado)` : user.role.toUpperCase()}\n` +
-    ` ├ 🔑 <b>Estado VIP:</b> ${status.hasPlan ? `${EMOJI.CHECK} ACTIVO` : `${EMOJI.CROSS} INACTIVO`}\n` +
+    ` ├ ${EMOJI.STAR} <b>Rango:</b> ${isOwner(user.telegramId) || user.role === 'owner' ? `${EMOJI.CROWN} OWNER (Ilimitado)` : user.role.toUpperCase()}\n` +
+    ` ├ ${EMOJI.LOCK} <b>Estado VIP:</b> ${status.hasPlan ? `${EMOJI.CHECK} ACTIVO` : `${EMOJI.CROSS} INACTIVO`}\n` +
     ` └ ${EMOJI.CALENDAR} <b>Expiración:</b> <code>${expDateStr}</code>\n\n` +
     `${EMOJI.LIGHTNING} <b>CÓDIGO DE ACCESO PANEL</b>\n` +
-    ` └ 🗝️ <code>${chatId}</code>\n\n` +
+    ` └ ${EMOJI.LOCK} <code>${chatId}</code>\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `<i>Ingresa tu ID <code>${chatId}</code> en el panel de la extensión CODEX(R) para iniciar sesión.</i>`;
 
@@ -447,10 +453,10 @@ async function handleVipCommand(msg) {
   await sendMessage(chatId,
     `${EMOJI.PARTY} <b>CODEX(R) — MEMBRESÍA VIP ACTIVADA CON ÉXITO</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `👤 <b>DATOS DEL OPERADOR</b>\n` +
-    ` ├ 🪪 <b>Nombre:</b> ${user.name}\n` +
-    ` ├ 💬 <b>Usuario:</b> ${user.username || 'Sin @'}\n` +
-    ` └ 🆔 <b>Telegram ID:</b> <code>${user.telegramId}</code>\n\n` +
+    `${EMOJI.STAR} <b>DATOS DEL OPERADOR</b>\n` +
+    ` ├ ${EMOJI.PIN} <b>Nombre:</b> ${user.name}\n` +
+    ` ├ ${EMOJI.CHAT} <b>Usuario:</b> ${user.username || 'Sin @'}\n` +
+    ` └ ${EMOJI.TAG} <b>Telegram ID:</b> <code>${user.telegramId}</code>\n\n` +
     `${EMOJI.STAR} <b>LICENCIA CONCEDIDA</b>\n` +
     ` ├ ${EMOJI.PLUS} <b>Días Agregados:</b> <code>+${daysNum} Días</code>\n` +
     ` └ ${EMOJI.CALENDAR} <b>Nueva Expiración:</b> <code>${expDateStr}</code>\n\n` +
@@ -465,7 +471,7 @@ async function handleVipCommand(msg) {
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
         `El administrador te ha otorgado <b>${daysNum} días</b> de membresía VIP.\n\n` +
         `${EMOJI.CALENDAR} <b>Fecha Expiración:</b> <code>${expDateStr}</code>\n\n` +
-        `🔑 Tu código de acceso para la extensión es: <code>${user.telegramId}</code>`,
+        `${EMOJI.LOCK} Tu código de acceso para la extensión es: <code>${user.telegramId}</code>`,
         getActivePlanKeyboard()
       );
     } catch { }
@@ -506,8 +512,8 @@ async function handleRemoveVipCommand(msg) {
   await sendMessage(chatId,
     `🚫 <b>CODEX(R) — PLAN VIP REMOVIDO</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `👤 <b>Operador:</b> ${user.name}\n` +
-    `🆔 <b>ID:</b> <code>${user.telegramId}</code>\n` +
+    `${EMOJI.STAR} <b>Operador:</b> ${user.name}\n` +
+    `${EMOJI.TAG} <b>ID:</b> <code>${user.telegramId}</code>\n` +
     `${EMOJI.WARNING} <b>Estado:</b> ${EMOJI.CROSS} Membresía VIP cancelada.`
   );
 }
@@ -531,9 +537,9 @@ async function handleListUsersCommand(msg) {
 
   users.forEach((u, idx) => {
     const status = getVipStatus(u);
-    const badge = isOwner(u.telegramId) || u.role === 'owner' ? EMOJI.CROWN : '👤';
+    const badge = isOwner(u.telegramId) || u.role === 'owner' ? EMOJI.CROWN : EMOJI.STAR;
     text += `<b>${idx + 1}.</b> ${badge} <b>${u.name}</b> (${u.username || 'Sin @'})\n`;
-    text += `   └ 🆔 <code>${u.telegramId}</code> | 🌟 <b>${status.label}</b>\n\n`;
+    text += `   └ ${EMOJI.TAG} <code>${u.telegramId}</code> | ${EMOJI.STAR} <b>${status.label}</b>\n\n`;
   });
 
   text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${EMOJI.CHART} Total Registrados: <code>${users.length}</code>`;
