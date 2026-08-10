@@ -56,7 +56,7 @@ export async function syncUserToSupabase(user) {
         name: user.name,
         username: user.username || null,
         role: user.role,
-        plan_expiry: user.planExpiry ? new Date(user.planExpiry).toISOString() : null,
+        plan_expiry: user.planExpiry ? Number(user.planExpiry) : null,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'telegram_id' });
 

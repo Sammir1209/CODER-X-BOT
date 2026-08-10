@@ -33,4 +33,5 @@ export const EMOJI = {
   SHOPPING:   '<tg-emoji emoji-id="5229064374403998351">🛍</tg-emoji>',
   PROHIBITED: '<tg-emoji emoji-id="5240241223632954241">🚫</tg-emoji>',
   BULB:       '<tg-emoji emoji-id="5422439311196834318">💡</tg-emoji>',
+  KEY:        '<tg-emoji emoji-id="5368324170671202286">🔑</tg-emoji>',
 };

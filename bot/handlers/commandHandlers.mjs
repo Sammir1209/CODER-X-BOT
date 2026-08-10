@@ -242,12 +242,29 @@ export async function handleExtension(msg) {
     console.log(`[BOT] Preparando envío de extensión a usuario VIP ${chatId}...`);
 
     if (!existsSync(ZIP_PATH)) {
-      console.log('[BOT] Compilando extensión...');
-      execSync('npm run build', { cwd: ROOT_DIR, stdio: 'ignore' });
-      execSync(
-        `powershell -Command "Compress-Archive -Path '${DIST_DIR}\\*' -DestinationPath '${ZIP_PATH}' -Force"`,
-        { cwd: ROOT_DIR, stdio: 'ignore' }
-      );
+      if (!existsSync(DIST_DIR)) {
+        console.log('[BOT] Compilando extensión...');
+        try {
+          execSync('npm run build', { cwd: ROOT_DIR, stdio: 'ignore', timeout: 120000 });
+        } catch (buildErr) {
+          console.error('[BOT] Build falló, verificando si dist/ ya existe...');
+          if (!existsSync(DIST_DIR)) {
+            throw new Error('No se pudo compilar la extensión y dist/ no existe.');
+          }
+        }
+      }
+      console.log('[BOT] Empaquetando ZIP...');
+      try {
+        // Linux (Render) — usa el comando zip
+        execSync(`cd "${DIST_DIR}" && zip -r "${ZIP_PATH}" .`, { stdio: 'ignore', timeout: 60000 });
+      } catch {
+        // Fallback: intenta con tar si zip no está disponible
+        try {
+          execSync(`tar -czvf "${ZIP_PATH}" -C "${DIST_DIR}" .`, { stdio: 'ignore', timeout: 60000 });
+        } catch {
+          throw new Error('No se pudo empaquetar el ZIP. Ni zip ni tar están disponibles.');
+        }
+      }
       console.log('[BOT] ZIP empaquetado.');
     }
 
