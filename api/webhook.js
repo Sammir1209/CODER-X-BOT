@@ -41,12 +41,20 @@ async function sendMessage(chatId, text, extra = {}) {
   });
 }
 
+const OWNER_1_LINK = 'https://t.me/S_14xx';
+const OWNER_2_LINK = 'https://t.me/mrcodexofc';
+
 function getNoPlanKeyboard() {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: '💬 Contactar Administrador / Adquirir Plan', url: OWNER_LINK }],
-        [{ text: '👤 Ver Mi Perfil / Estado', callback_data: 'check_profile' }],
+        [
+          { text: '👑 Owner 1: @S_14xx', url: OWNER_1_LINK },
+          { text: '👑 Owner 2: @mrcodexofc', url: OWNER_2_LINK },
+        ],
+        [
+          { text: '👤 Ver Mi Perfil / Estado', callback_data: 'check_profile' },
+        ],
       ],
     },
   };
@@ -56,8 +64,13 @@ function getActivePlanKeyboard() {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: '👤 Ver Mi Perfil', callback_data: 'check_profile' }],
-        [{ text: '💬 Soporte Admin', url: OWNER_LINK }],
+        [
+          { text: '👑 Owner 1: @S_14xx', url: OWNER_1_LINK },
+          { text: '👑 Owner 2: @mrcodexofc', url: OWNER_2_LINK },
+        ],
+        [
+          { text: '👤 Ver Mi Perfil', callback_data: 'check_profile' },
+        ],
       ],
     },
   };
@@ -76,9 +89,10 @@ async function handleStart(msg) {
     await sendMessage(chatId,
       `👋 <b>¡Hola, ${user.name}!</b>\n\n` +
       `Bienvenido a <b>CODEX(R) SYSTEM</b>.\n\n` +
+      `👤 <b>Nombre:</b> ${user.name}\n` +
       `📌 <b>Tu ID de Telegram:</b> <code>${chatId}</code>\n` +
-      `👤 <b>Usuario:</b> <code>${user.username || 'Sin @'}</code>\n` +
-      `🌟 <b>Plan VIP:</b> ✅ <b>${status.label}</b>\n\n` +
+      `💬 <b>Usuario:</b> <code>${user.username || 'Sin @'}</code>\n` +
+      `🌟 <b>Membresía:</b> ✅ <b>${status.label}</b>\n\n` +
       `<b>Comandos disponibles:</b>\n` +
       `🔹 /me — Ver tu perfil de acceso\n` +
       `🔹 /help — Lista de comandos`,
@@ -87,11 +101,12 @@ async function handleStart(msg) {
   } else {
     await sendMessage(chatId,
       `👋 <b>¡Hola, ${user.name}!</b>\n\n` +
+      `👤 <b>Nombre:</b> ${user.name}\n` +
       `📌 <b>Tu ID de Telegram:</b> <code>${chatId}</code> fue verificado.\n` +
-      `👤 <b>Usuario:</b> <code>${user.username || 'Sin @'}</code>\n` +
+      `💬 <b>Usuario:</b> <code>${user.username || 'Sin @'}</code>\n` +
       `⚠️ <b>Estado:</b> ❌ <b>SIN PLAN VIP ACTIVO</b>\n\n` +
       `Para ingresar a la extensión y obtener tus códigos de acceso OTP, necesitas un <b>Plan VIP</b>.\n\n` +
-      `Haz clic en el botón de abajo para contactar al administrador y activar tu membresía.`,
+      `Ponte en contacto con cualquiera de nuestros administradores para activar tu membresía.`,
       getNoPlanKeyboard()
     );
   }
@@ -106,20 +121,22 @@ async function handleProfile(msg) {
   const user = getOrRegisterUser(chatId, { name, username });
   const status = getVipStatus(user);
 
-  const expDateStr = user.planExpiry
-    ? new Date(user.planExpiry).toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' })
-    : 'Ninguna';
+  const expDateStr = isOwner(user.telegramId) || user.role === 'owner'
+    ? 'VIP OWNER (Ilimitado)'
+    : user.planExpiry
+      ? new Date(user.planExpiry).toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' })
+      : 'Sin plan activo';
 
   const text =
     `👤 <b>CODEX(R) — Perfil de Usuario</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `🆔 <b>Telegram ID:</b> <code>${chatId}</code>\n` +
     `👤 <b>Nombre:</b> ${user.name}\n` +
-    `💬 <b>Username:</b> ${user.username || 'N/A'}\n` +
-    `🌟 <b>Estado VIP:</b> ${status.hasPlan ? '✅ ' + status.label : '❌ SIN PLAN'}\n` +
+    `🆔 <b>Telegram ID:</b> <code>${chatId}</code>\n` +
+    `💬 <b>Usuario:</b> ${user.username || 'Sin @'}\n` +
+    `🌟 <b>Membresía:</b> ${status.hasPlan ? '✅ ' + status.label : '❌ SIN PLAN'}\n` +
     `📅 <b>Expiración:</b> ${expDateStr}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-    `<i>Ingresa tu ID de Telegram en el panel de la extensión CODEX(R) para iniciar sesión.</i>`;
+    `<i>Ingresa tu ID <code>${chatId}</code> en el panel de la extensión CODEX(R) para iniciar sesión.</i>`;
 
   const keyboard = status.hasPlan ? getActivePlanKeyboard() : getNoPlanKeyboard();
   await sendMessage(chatId, text, keyboard);
