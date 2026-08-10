@@ -21,6 +21,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import http from 'http';
 import FormData from 'form-data';
+import { createClient } from '@supabase/supabase-js';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -43,18 +44,43 @@ export function isOwner(telegramId) {
   return OWNER_IDS.includes(idStr);
 }
 
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+export async function syncUserToSupabase(user) {
+  try {
+    await supabase.from('codex_users').upsert({
+      telegram_id: String(user.telegramId),
+      username: user.username || null,
+      name: user.name || 'User',
+      role: user.role || 'user',
+      plan_expiry: user.planExpiry || null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'telegram_id' });
+  } catch (e) {
+    console.warn('[SUPABASE] Warning syncing user:', e.message);
+  }
+}
+
 // ─── User Database Manager ───────────────────────────────────────────────────
 
 export function loadUsersDb() {
   if (!existsSync(DB_FILE)) {
     const initial = [
       {
-        telegramId: OWNER_ID,
-        username: '@SammirContreras',
-        name: 'Owner (Sammir)',
+        telegramId: '7794982496',
+        username: '@S_14xx',
+        name: '𝐶𝑜𝑑𝑒𝑟 | ɮʟʊɛʟօօƈӄ | 『 𝙏𝙚𝙖𝙢 𝙉𝙚𝙭𝙪𝙨 』',
         role: 'owner',
-        planExpiry: 4102444800000, // Year 2100
-        createdAt: Date.now(),
+        planExpiry: 4102444800000,
+        createdAt: 1770000000000,
+      },
+      {
+        telegramId: '7317734631',
+        username: '@mrcodexofc',
+        name: '𝐌𝐫. 𝐂𝐎𝐃𝐄𝐗',
+        role: 'owner',
+        planExpiry: 4102444800000,
+        createdAt: 1786319145409,
       },
     ];
     saveUsersDb(initial);
@@ -104,6 +130,9 @@ export function getOrRegisterUser(telegramId, userInfo = {}) {
     }
     if (updated) saveUsersDb(users);
   }
+
+  // Sync with Supabase asynchronously
+  syncUserToSupabase(user).catch(() => {});
 
   return user;
 }
@@ -343,6 +372,7 @@ async function handleVipCommand(msg) {
   }
 
   saveUsersDb(users);
+  syncUserToSupabase(user).catch(() => {});
 
   const expDateStr = new Date(newExpiry).toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
@@ -398,6 +428,7 @@ async function handleRemoveVipCommand(msg) {
   user.planExpiry = null;
   user.role = 'user';
   saveUsersDb(users);
+  syncUserToSupabase(user).catch(() => {});
 
   await sendMessage(chatId, `🚫 Plan VIP removido de <b>${user.name}</b> (ID: <code>${user.telegramId}</code>).`);
 }
