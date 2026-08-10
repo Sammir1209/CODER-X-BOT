@@ -23,7 +23,7 @@ import FormData from 'form-data';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const BOT_TOKEN  = '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
+const BOT_TOKEN  = process.env.BOT_TOKEN || '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
 const API_BASE   = `https://api.telegram.org/bot${BOT_TOKEN}`;
 const __dirname  = dirname(fileURLToPath(import.meta.url));
 const ROOT       = resolve(__dirname, '..');
