@@ -541,7 +541,7 @@ async function handleExtension(msg) {
 
 async function handleHelp(msg) {
   const chatId = String(msg.chat.id);
-  const isOwner = chatId === OWNER_ID;
+  const isOwnerUser = isOwner(chatId);
 
   let text =
     `ℹ️ <b>CODEX(R) — Comandos de Bot</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
@@ -550,7 +550,7 @@ async function handleHelp(msg) {
     `🔹 /extension — Descargar la extensión compilada (.zip)\n` +
     `🔹 /status — Estado del servidor\n\n`;
 
-  if (isOwner) {
+  if (isOwnerUser) {
     text +=
       `👑 <b>COMANDOS DE ADMINISTRADOR:</b>\n` +
       `🔸 <code>/vip [ID/@username] [días]</code> — Dar VIP a un usuario\n` +
@@ -653,7 +653,7 @@ async function main() {
 
   console.log(`\n🚀 CODEX(R) Bot & VIP Manager iniciado`);
   console.log(`   Bot: @${me.result.username}`);
-  console.log(`   Owner ID: ${OWNER_ID}`);
+  console.log(`   Owner IDs: ${OWNER_IDS.join(', ')}`);
   console.log(`   Comandos Admin: /vip  /removevip  /users`);
   console.log(`   Comandos Usuario: /start  /me  /extension  /status\n`);
 
