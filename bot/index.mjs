@@ -20,10 +20,11 @@ export async function processUpdate(update) {
     const text = msg.text.trim();
     const chatId = String(msg.chat.id);
     const from = msg.from || {};
+    const userId = String(from.id || msg.chat.id);
     const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
     const username = from.username ? `@${from.username}` : '';
 
-    getOrRegisterUser(chatId, { name, username });
+    getOrRegisterUser(userId, { name, username });
 
     const cmd = text.split(/\s+/)[0].toLowerCase().replace(/@.*$/, '');
 

@@ -26,26 +26,28 @@ import { sendDocument, sendMessage } from '../services/telegramApi.mjs';
 export async function handleStart(msg) {
   const chatId = String(msg.chat.id);
   const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
   const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
   const username = from.username ? `@${from.username}` : '';
 
-  const user = getOrRegisterUser(chatId, { name, username });
+  const user = getOrRegisterUser(userId, { name, username });
   const status = getVipStatus(user);
 
   if (status.hasPlan) {
-    await sendMessage(chatId, renderStartVipMessage(user, chatId, status), getActivePlanKeyboard());
+    await sendMessage(chatId, renderStartVipMessage(user, userId, status), getActivePlanKeyboard());
   } else {
-    await sendMessage(chatId, renderStartNoPlanMessage(user, chatId), getNoPlanKeyboard());
+    await sendMessage(chatId, renderStartNoPlanMessage(user, userId), getNoPlanKeyboard());
   }
 }
 
 export async function handleProfile(msg) {
   const chatId = String(msg.chat.id);
   const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
   const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
   const username = from.username ? `@${from.username}` : '';
 
-  const user = getOrRegisterUser(chatId, { name, username });
+  const user = getOrRegisterUser(userId, { name, username });
   const status = getVipStatus(user);
   const isOwnerUser = isOwner(user.telegramId) || user.role === 'owner';
 
@@ -55,14 +57,16 @@ export async function handleProfile(msg) {
       ? new Date(user.planExpiry).toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' })
       : 'Sin plan activo';
 
-  const text = renderProfileMessage(user, chatId, status, expDateStr, isOwnerUser);
+  const text = renderProfileMessage(user, userId, status, expDateStr, isOwnerUser);
   const keyboard = status.hasPlan ? getActivePlanKeyboard() : getNoPlanKeyboard();
   await sendMessage(chatId, text, keyboard);
 }
 
 export async function handleVipCommand(msg) {
   const chatId = String(msg.chat.id);
-  if (!isOwner(chatId)) {
+  const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
+  if (!isOwner(userId)) {
     await sendMessage(chatId, `${EMOJI.CROSS} <b>Acceso Denegado.</b> Este comando es exclusivo del Administrador.`);
     return;
   }
@@ -137,7 +141,9 @@ export async function handleVipCommand(msg) {
 
 export async function handleRemoveVipCommand(msg) {
   const chatId = String(msg.chat.id);
-  if (!isOwner(chatId)) {
+  const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
+  if (!isOwner(userId)) {
     await sendMessage(chatId, `${EMOJI.CROSS} Acceso denegado.`);
     return;
   }
@@ -177,7 +183,9 @@ export async function handleRemoveVipCommand(msg) {
 
 export async function handleListUsersCommand(msg) {
   const chatId = String(msg.chat.id);
-  if (!isOwner(chatId)) {
+  const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
+  if (!isOwner(userId)) {
     await sendMessage(chatId, `${EMOJI.CROSS} Acceso denegado.`);
     return;
   }
@@ -204,29 +212,31 @@ export async function handleListUsersCommand(msg) {
 }
 
 export async function handleStatus(msg) {
+  const chatId = String(msg.chat.id);
   const distExists = existsSync(DIST_DIR);
   const zipExists = existsSync(ZIP_PATH);
   const zipSize = zipExists ? `${(statSync(ZIP_PATH).size / 1024 / 1024).toFixed(1)} MB` : 'N/A';
   const usersCount = loadUsersDb().length;
   const timeStr = new Date().toLocaleString('es-MX');
 
-  await sendMessage(msg.chat.id, renderStatusMessage(distExists, zipExists, zipSize, usersCount, timeStr));
+  await sendMessage(chatId, renderStatusMessage(distExists, zipExists, zipSize, usersCount, timeStr));
 }
 
 export async function handleExtension(msg) {
   const chatId = String(msg.chat.id);
   const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
   const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
   const username = from.username ? `@${from.username}` : '';
 
-  const user = getOrRegisterUser(chatId, { name, username });
+  const user = getOrRegisterUser(userId, { name, username });
   const status = getVipStatus(user);
 
   if (!status.hasPlan) {
     await sendMessage(chatId,
       `${EMOJI.LOCK} <b>CODEX(R) — ACCESO DENEGADO (SIN PLAN VIP)</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `Hola <b>${user.name}</b>, tu ID de Telegram (<code>${chatId}</code>) no cuenta con una membresía VIP activa.\n\n` +
+      `Hola <b>${user.name}</b>, tu ID de Telegram (<code>${userId}</code>) no cuenta con una membresía VIP activa.\n\n` +
       `Para descargar el paquete de la extensión (.zip) y obtener tus códigos de acceso OTP, contacta a nuestros Administradores.`,
       getNoPlanKeyboard()
     );
@@ -239,7 +249,7 @@ export async function handleExtension(msg) {
   );
 
   try {
-    console.log(`[BOT] Preparando envío de extensión a usuario VIP ${chatId}...`);
+    console.log(`[BOT] Preparando envío de extensión a usuario VIP ${userId} (chat: ${chatId})...`);
 
     if (!existsSync(ZIP_PATH)) {
       if (!existsSync(DIST_DIR)) {
@@ -255,10 +265,8 @@ export async function handleExtension(msg) {
       }
       console.log('[BOT] Empaquetando ZIP...');
       try {
-        // Linux (Render) — usa el comando zip
         execSync(`cd "${DIST_DIR}" && zip -r "${ZIP_PATH}" .`, { stdio: 'ignore', timeout: 60000 });
       } catch {
-        // Fallback: intenta con tar si zip no está disponible
         try {
           execSync(`tar -czvf "${ZIP_PATH}" -C "${DIST_DIR}" .`, { stdio: 'ignore', timeout: 60000 });
         } catch {
@@ -269,7 +277,7 @@ export async function handleExtension(msg) {
     }
 
     const zipSize = existsSync(ZIP_PATH) ? (statSync(ZIP_PATH).size / 1024 / 1024).toFixed(1) : '1.5';
-    const caption = renderExtensionCaption(user, status, zipSize, chatId);
+    const caption = renderExtensionCaption(user, status, zipSize, userId);
 
     const res = await sendDocument(chatId, ZIP_PATH, caption);
     if (res.ok) {
@@ -289,6 +297,8 @@ export async function handleExtension(msg) {
 
 export async function handleHelp(msg) {
   const chatId = String(msg.chat.id);
-  const isOwnerUser = isOwner(chatId);
+  const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
+  const isOwnerUser = isOwner(userId);
   await sendMessage(chatId, renderHelpMessage(isOwnerUser));
 }

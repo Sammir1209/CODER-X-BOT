@@ -71,8 +71,21 @@ export async function syncUserToSupabase(user) {
 }
 
 export function getOrRegisterUser(telegramId, { name, username }) {
+  const targetId = String(telegramId);
+  // Never register or bind negative IDs (Telegram group/channel IDs)
+  if (targetId.startsWith('-')) {
+    return {
+      telegramId: targetId,
+      name: name || 'Grupo',
+      username: username || '',
+      role: 'user',
+      planExpiry: null,
+      createdAt: Date.now(),
+    };
+  }
+
   const users = loadUsersDb();
-  let user = users.find(u => u.telegramId === telegramId);
+  let user = users.find(u => u.telegramId === targetId);
   const now = Date.now();
 
   const formattedUsername = username ? (username.startsWith('@') ? username : `@${username}`) : '';
@@ -80,17 +93,17 @@ export function getOrRegisterUser(telegramId, { name, username }) {
   if (!user && formattedUsername) {
     const cleanHandle = formattedUsername.toLowerCase();
     user = users.find(u => u.username && u.username.toLowerCase() === cleanHandle);
-    if (user) {
-      console.log(`[BOT] Binding numerical Telegram ID ${telegramId} to existing username record ${user.username}`);
-      user.telegramId = telegramId;
+    if (user && (!user.telegramId || user.telegramId.startsWith('-') || user.telegramId.startsWith('user_'))) {
+      console.log(`[BOT] Binding numerical Telegram ID ${targetId} to existing username record ${user.username}`);
+      user.telegramId = targetId;
       if (name) user.name = name;
     }
   }
 
   if (!user) {
-    const role = isOwner(telegramId) ? 'owner' : 'user';
+    const role = isOwner(targetId) ? 'owner' : 'user';
     user = {
-      telegramId,
+      telegramId: targetId,
       name: name || 'Operador',
       username: formattedUsername,
       role,
@@ -110,7 +123,7 @@ export function getOrRegisterUser(telegramId, { name, username }) {
       user.username = formattedUsername;
       updated = true;
     }
-    if (isOwner(telegramId) && user.role !== 'owner') {
+    if (isOwner(targetId) && user.role !== 'owner') {
       user.role = 'owner';
       updated = true;
     }
