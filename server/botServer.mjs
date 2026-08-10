@@ -287,27 +287,35 @@ async function handleStart(msg) {
 
   if (status.hasPlan) {
     await sendMessage(chatId,
-      `👋 <b>¡Hola, ${user.name}!</b>\n\n` +
-      `Bienvenido a <b>CODEX(R) SYSTEM</b>.\n\n` +
-      `👤 <b>Nombre:</b> ${user.name}\n` +
-      `📌 <b>Tu ID de Telegram:</b> <code>${chatId}</code>\n` +
-      `💬 <b>Usuario:</b> <code>${user.username || 'Sin @'}</code>\n` +
-      `🌟 <b>Membresía:</b> ✅ <b>${status.label}</b>\n\n` +
-      `<b>Comandos disponibles:</b>\n` +
-      `🔹 /extension — Descargar paquete de la extensión (.zip)\n` +
-      `🔹 /me — Ver tu perfil de acceso\n` +
-      `🔹 /help — Lista de comandos`,
+      `⚡ <b>CODEX(R) SYSTEM — PLATAFORMA DE CONTROL</b> ⚡\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `✨ <b>¡Hola, ${user.name}!</b>\n` +
+      `Tu identidad ha sido verificada en el servidor central.\n\n` +
+      `📊 <b>DATOS DE TU CUENTA</b>\n` +
+      ` ├ 👤 <b>Nombre:</b> ${user.name}\n` +
+      ` ├ 🆔 <b>ID Telegram:</b> <code>${chatId}</code>\n` +
+      ` └ 💬 <b>Usuario:</b> ${user.username || 'Sin Username'}\n\n` +
+      `💎 <b>ESTADO DE SUSCRIPCIÓN</b>\n` +
+      ` └ 🌟 <b>Membresía:</b> ✅ <b>${status.label}</b>\n\n` +
+      `📌 <b>COMANDOS RÁPIDOS:</b>\n` +
+      ` 🔹 /extension — Descargar paquete de extensión (.zip)\n` +
+      ` 🔹 /me — Ver tu perfil de acceso\n` +
+      ` 🔹 /help — Lista de comandos`,
       getActivePlanKeyboard()
     );
   } else {
     await sendMessage(chatId,
-      `👋 <b>¡Hola, ${user.name}!</b>\n\n` +
-      `👤 <b>Nombre:</b> ${user.name}\n` +
-      `📌 <b>Tu ID de Telegram:</b> <code>${chatId}</code> fue verificado.\n` +
-      `💬 <b>Usuario:</b> <code>${user.username || 'Sin @'}</code>\n` +
-      `⚠️ <b>Estado:</b> ❌ <b>SIN PLAN VIP ACTIVO</b>\n\n` +
-      `Para ingresar a la extensión y obtener tus códigos de acceso OTP, necesitas un <b>Plan VIP</b>.\n\n` +
-      `Ponte en contacto con cualquiera de nuestros administradores para activar tu membresía.`,
+      `⚡ <b>CODEX(R) SYSTEM — PLATAFORMA DE CONTROL</b> ⚡\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `👋 <b>¡Hola, ${user.name}!</b>\n` +
+      `Tu ID de Telegram ha sido registrado correctamente.\n\n` +
+      `📊 <b>DATOS REGISTRADOS</b>\n` +
+      ` ├ 👤 <b>Nombre:</b> ${user.name}\n` +
+      ` ├ 🆔 <b>ID Telegram:</b> <code>${chatId}</code>\n` +
+      ` └ 💬 <b>Usuario:</b> ${user.username || 'Sin Username'}\n\n` +
+      `⚠️ <b>ESTADO DE SUSCRIPCIÓN</b>\n` +
+      ` └ ❌ <b>SIN PLAN VIP ACTIVO</b>\n\n` +
+      `🔒 <i>Para acceder a la extensión CODEX(R) y generar códigos OTP, adquiere un Plan VIP con nuestros Administradores.</i>`,
       getNoPlanKeyboard()
     );
   }
@@ -329,14 +337,19 @@ async function handleProfile(msg) {
       : 'Sin plan activo';
 
   const text =
-    `👤 <b>CODEX(R) — Perfil de Usuario</b>\n` +
-    `━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `👤 <b>Nombre:</b> ${user.name}\n` +
-    `🆔 <b>Telegram ID:</b> <code>${chatId}</code>\n` +
-    `💬 <b>Usuario:</b> ${user.username || 'Sin @'}\n` +
-    `🌟 <b>Membresía:</b> ${status.hasPlan ? '✅ ' + status.label : '❌ SIN PLAN'}\n` +
-    `📅 <b>Expiración:</b> ${expDateStr}\n\n` +
-    `━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💎 <b>CODEX(R) — PANEL DE PERFIL DE OPERADOR</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `👤 <b>INFORMACIÓN PERSONAL</b>\n` +
+    ` ├ 🪪 <b>Nombre:</b> ${user.name}\n` +
+    ` ├ 🆔 <b>Telegram ID:</b> <code>${chatId}</code>\n` +
+    ` └ 💬 <b>Handle:</b> ${user.username || 'Sin @'}\n\n` +
+    `🛡️ <b>ESTADO Y LICENCIA</b>\n` +
+    ` ├ 🌟 <b>Rango:</b> ${isOwner(user.telegramId) || user.role === 'owner' ? '👑 OWNER (Ilimitado)' : user.role.toUpperCase()}\n` +
+    ` ├ 🔑 <b>Estado VIP:</b> ${status.hasPlan ? '✅ ACTIVO' : '❌ INACTIVO'}\n` +
+    ` └ 📅 <b>Expiración:</b> <code>${expDateStr}</code>\n\n` +
+    `⚡ <b>CÓDIGO DE ACCESO PANEL</b>\n` +
+    ` └ 🗝️ <code>${chatId}</code>\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `<i>Ingresa tu ID <code>${chatId}</code> en el panel de la extensión CODEX(R) para iniciar sesión.</i>`;
 
   const keyboard = status.hasPlan ? getActivePlanKeyboard() : getNoPlanKeyboard();
@@ -353,11 +366,12 @@ async function handleVipCommand(msg) {
   const parts = msg.text.trim().split(/\s+/);
   if (parts.length < 3) {
     await sendMessage(chatId,
-      `💡 <b>Uso del comando /vip:</b>\n` +
-      `<code>/vip [telegramId o @username] [días]</code>\n\n` +
+      `💡 <b>CODEX(R) — USO DEL COMANDO /vip</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `Sintaxis: <code>/vip [telegramId o @username] [días]</code>\n\n` +
       `Ejemplos:\n` +
       `• <code>/vip 7794982496 30</code>\n` +
-      `• <code>/vip @sammir 7</code>`
+      `• <code>/vip @mrcodexofc 60</code>`
     );
     return;
   }
@@ -366,7 +380,7 @@ async function handleVipCommand(msg) {
   const daysNum = parseInt(parts[2], 10);
 
   if (isNaN(daysNum) || daysNum <= 0) {
-    await sendMessage(chatId, '❌ Los días deben ser un número mayor a 0.');
+    await sendMessage(chatId, '❌ <b>Error:</b> Los días deben ser un número entero mayor a 0.');
     return;
   }
 
@@ -404,21 +418,27 @@ async function handleVipCommand(msg) {
 
   // 1. Notify Owner
   await sendMessage(chatId,
-    `🎉 <b>¡PLAN VIP OTORGADO CON ÉXITO!</b>\n\n` +
-    `👤 <b>Usuario:</b> ${user.name} (${user.username || 'Sin @'})\n` +
-    `🆔 <b>ID:</b> <code>${user.telegramId}</code>\n` +
-    `⏳ <b>Días Agregados:</b> ${daysNum} días\n` +
-    `📅 <b>Nueva Fecha Expiración:</b> ${expDateStr}`
+    `🎉 <b>CODEX(R) — MEMBRESÍA VIP ACTIVADA CON ÉXITO</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `👤 <b>DATOS DEL OPERADOR</b>\n` +
+    ` ├ 🪪 <b>Nombre:</b> ${user.name}\n` +
+    ` ├ 💬 <b>Usuario:</b> ${user.username || 'Sin @'}\n` +
+    ` └ 🆔 <b>Telegram ID:</b> <code>${user.telegramId}</code>\n\n` +
+    `⏳ <b>LICENCIA CONCEDIDA</b>\n` +
+    ` ├ ➕ <b>Días Agregados:</b> <code>+${daysNum} Días</code>\n` +
+    ` └ 📅 <b>Nueva Expiración:</b> <code>${expDateStr}</code>\n\n` +
+    `👑 <i>Otorgado por el Administrador de CODEX(R) System.</i>`
   );
 
   // 2. Notify Target User if valid Telegram ID
   if (/^\d+$/.test(user.telegramId)) {
     try {
       await sendMessage(user.telegramId,
-        `🎉 <b>¡TU PLAN VIP HA SIDO ACTIVADO!</b>\n\n` +
-        `El administrador te ha otorgado <b>${daysNum} días</b> de acceso VIP.\n\n` +
-        `📅 <b>Fecha Expiración:</b> ${expDateStr}\n\n` +
-        `Ya puedes ingresar tu ID <code>${user.telegramId}</code> en la extensión CODEX(R) para recibir tus códigos OTP.`,
+        `🎉 <b>¡TU PLAN VIP HA SIDO ACTIVADO!</b>\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `El administrador te ha otorgado <b>${daysNum} días</b> de membresía VIP.\n\n` +
+        `📅 <b>Fecha Expiración:</b> <code>${expDateStr}</code>\n\n` +
+        `🔑 Tu código de acceso para la extensión es: <code>${user.telegramId}</code>`,
         getActivePlanKeyboard()
       );
     } catch { }
@@ -456,7 +476,13 @@ async function handleRemoveVipCommand(msg) {
   saveUsersDb(users);
   syncUserToSupabase(user).catch(() => {});
 
-  await sendMessage(chatId, `🚫 Plan VIP removido de <b>${user.name}</b> (ID: <code>${user.telegramId}</code>).`);
+  await sendMessage(chatId,
+    `🚫 <b>CODEX(R) — PLAN VIP REMOVIDO</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `👤 <b>Operador:</b> ${user.name}\n` +
+    `🆔 <b>ID:</b> <code>${user.telegramId}</code>\n` +
+    `⚠️ <b>Estado:</b> ❌ Membresía VIP cancelada.`
+  );
 }
 
 async function handleListUsersCommand(msg) {
@@ -472,13 +498,18 @@ async function handleListUsersCommand(msg) {
     return;
   }
 
-  let text = `📋 <b>CODEX(R) — Usuarios Registrados (${users.length})</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  let text =
+    `📋 <b>CODEX(R) — BASE DE DATOS DE OPERADORES (${users.length})</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   users.forEach((u, idx) => {
     const status = getVipStatus(u);
-    text += `${idx + 1}. <b>${u.name}</b> (${u.username || 'no-user'})\n`;
-    text += `   🆔 ID: <code>${u.telegramId}</code> | Status: ${status.label}\n\n`;
+    const badge = isOwner(u.telegramId) || u.role === 'owner' ? '👑' : '👤';
+    text += `<b>${idx + 1}.</b> ${badge} <b>${u.name}</b> (${u.username || 'Sin @'})\n`;
+    text += `   └ 🆔 <code>${u.telegramId}</code> | 🌟 <b>${status.label}</b>\n\n`;
   });
+
+  text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📊 Total Registrados: <code>${users.length}</code>`;
 
   await sendMessage(chatId, text);
 }
@@ -490,12 +521,17 @@ async function handleStatus(msg) {
   const usersCount = loadUsersDb().length;
 
   await sendMessage(msg.chat.id,
-    `🖥 <b>CODEX(R) — Estado del Servidor</b>\n\n` +
-    `📁 Compilación <code>dist/</code>: ${distExists ? '✅ Lista' : '❌ Pendiente'}\n` +
-    `📦 Paquete ZIP: ${zipExists ? `✅ ${zipSize}` : '❌ No creado'}\n` +
-    `👥 Usuarios Registrados: ${usersCount}\n` +
-    `🕐 Hora Servidor: ${new Date().toLocaleString('es-MX')}\n` +
-    `🤖 Bot: @CodexrOutBot`
+    `📊 <b>CODEX(R) — ESTADO TÉCNICO DEL SERVIDOR</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `🌐 <b>INFRAESTRUCTURA DE RED</b>\n` +
+    ` ├ 🤖 <b>Bot Telegram:</b> @CodexrOutBot\n` +
+    ` ├ ⚡ <b>Health Check Server:</b> <code>Online (Puerto 10000)</code>\n` +
+    ` └ ☁️ <b>Base de Datos:</b> Supabase Connected\n\n` +
+    `📦 <b>SISTEMA Y COMPILACIÓN</b>\n` +
+    ` ├ 📁 <b>Extensión (dist/):</b> ${distExists ? '✅ Compilado' : '❌ Pendiente'}\n` +
+    ` ├ 📦 <b>ZIP VIP:</b> ${zipExists ? `✅ Listo (${zipSize})` : '❌ Sin crear'}\n` +
+    ` └ 👥 <b>Usuarios Registrados:</b> <code>${usersCount}</code>\n\n` +
+    `🕐 <b>HORA SERVIDOR:</b> <code>${new Date().toLocaleString('es-MX')}</code>`
   );
 }
 
@@ -510,23 +546,23 @@ async function handleExtension(msg) {
 
   if (!status.hasPlan) {
     await sendMessage(chatId,
-      `❌ <b>ACCESO DENEGADO — SIN PLAN VIP</b>\n\n` +
-      `Hola <b>${user.name}</b>, tu ID de Telegram (<code>${chatId}</code>) no tiene una membresía VIP activa.\n\n` +
-      `Para descargar el paquete de la extensión (.zip) y usar la plataforma CODEX(R), ponte en contacto con el administrador para activar tu suscripción.`,
+      `🔒 <b>CODEX(R) — ACCESO DENEGADO (SIN PLAN VIP)</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `Hola <b>${user.name}</b>, tu ID de Telegram (<code>${chatId}</code>) no cuenta con una membresía VIP activa.\n\n` +
+      `Para descargar el paquete de la extensión (.zip) y obtener tus códigos de acceso OTP, contacta a nuestros Administradores.`,
       getNoPlanKeyboard()
     );
     return;
   }
 
   await sendMessage(chatId,
-    `⚙️ <b>Preparando paquete de extensión CODEX(R)...</b>\n` +
-    `Generando y verificando archivo ZIP actualizado... por favor espera.`
+    `⚙️ <b>PREPARANDO PAQUETE DE EXTENSIÓN CODEX(R)...</b>\n` +
+    `Verificando compilación del sistema y empaquetando archivo ZIP actualizado... por favor espera unos segundos.`
   );
 
   try {
     console.log(`[BOT] Preparando envío de extensión a usuario VIP ${chatId}...`);
 
-    // Check if zip exists; build if missing or outdated
     if (!existsSync(ZIP_PATH)) {
       console.log('[BOT] Compilando extensión...');
       execSync('npm run build', { cwd: ROOT, stdio: 'ignore' });
@@ -539,15 +575,19 @@ async function handleExtension(msg) {
 
     const zipSize = existsSync(ZIP_PATH) ? (statSync(ZIP_PATH).size / 1024 / 1024).toFixed(1) : '1.5';
     const caption =
-      `📦 <b>CODEX(R) Extension (V1.1 VIP)</b>\n\n` +
-      `👤 Usuario VIP: <b>${user.name}</b>\n` +
-      `⏳ Días Restantes: <b>${status.daysLeft} días</b>\n` +
-      `📁 Tamaño: <b>${zipSize} MB</b>\n\n` +
-      `<b>Instrucciones de instalación:</b>\n` +
-      `1️⃣ Descomprime el ZIP\n` +
-      `2️⃣ Abre Chrome e ingresa a <code>chrome://extensions</code>\n` +
-      `3️⃣ Activa el <b>"Modo desarrollador"</b>\n` +
-      `4️⃣ Clic en <b>"Cargar extensión sin empaquetar"</b> y selecciona la carpeta descomprimida.`;
+      `📦 <b>CODEX(R) — PAQUETE DE EXTENSIÓN VIP (V1.1)</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `👤 <b>USUARIO AUTORIZADO</b>\n` +
+      ` ├ 👤 <b>Operador:</b> ${user.name}\n` +
+      ` ├ ⏳ <b>Membresía:</b> ${status.label}\n` +
+      ` └ 📁 <b>Tamaño Paquete:</b> <code>${zipSize} MB</code>\n\n` +
+      `🚀 <b>GUÍA RÁPIDA DE INSTALACIÓN</b>\n` +
+      ` 1️⃣ <b>Descomprime</b> el archivo <code>CODEX_R_Extension.zip</code>.\n` +
+      ` 2️⃣ Abre Chrome e ingresa a <code>chrome://extensions</code>.\n` +
+      ` 3️⃣ Activa el <b>"Modo desarrollador"</b> arriba a la derecha.\n` +
+      ` 4️⃣ Haz clic en <b>"Cargar extensión sin empaquetar"</b> y selecciona la carpeta.\n` +
+      ` 5️⃣ Abre la extensión e ingresa tu ID <code>${chatId}</code>.\n\n` +
+      `🔒 <i>Paquete cifrado exclusivo para miembros VIP.</i>`;
 
     const res = await sendDocument(chatId, ZIP_PATH, caption);
     if (res.ok) {
@@ -570,19 +610,23 @@ async function handleHelp(msg) {
   const isOwnerUser = isOwner(chatId);
 
   let text =
-    `ℹ️ <b>CODEX(R) — Comandos de Bot</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `🔹 /start — Registrarse y consultar estado de suscripción\n` +
-    `🔹 /me — Ver tu perfil de usuario y días VIP restantes\n` +
-    `🔹 /extension — Descargar la extensión compilada (.zip)\n` +
-    `🔹 /status — Estado del servidor\n\n`;
+    `ℹ️ <b>CODEX(R) — CENTRO DE COMANDOS Y AYUDA</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `🔹 <b>COMANDOS DE USUARIO</b>\n` +
+    ` ├ /start — Registrar identidad y verificar estado\n` +
+    ` ├ /me — Consultar perfil personal y ID de acceso\n` +
+    ` ├ /extension — Descargar paquete VIP de la extensión (.zip)\n` +
+    ` └ /status — Verificar salud del servidor\n\n`;
 
   if (isOwnerUser) {
     text +=
-      `👑 <b>COMANDOS DE ADMINISTRADOR:</b>\n` +
-      `🔸 <code>/vip [ID/@username] [días]</code> — Dar VIP a un usuario\n` +
-      `🔸 <code>/removevip [ID/@username]</code> — Quitar VIP a un usuario\n` +
-      `🔸 <code>/users</code> — Ver lista completa de usuarios\n\n`;
+      `👑 <b>COMANDOS DE ADMINISTRADOR</b>\n` +
+      ` ├ <code>/vip [ID/@username] [días]</code> — Asignar días VIP\n` +
+      ` ├ <code>/removevip [ID/@username]</code> — Revocar plan VIP\n` +
+      ` └ <code>/users</code> — Listar base de datos completa de usuarios\n\n`;
   }
+
+  text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💬 <i>Dudas o soporte técnico contacta a nuestros Administradores.</i>`;
 
   await sendMessage(chatId, text);
 }
