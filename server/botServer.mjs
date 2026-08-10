@@ -24,17 +24,22 @@ import FormData from 'form-data';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const BOT_TOKEN  = process.env.BOT_TOKEN || '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
-const API_BASE   = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const __dirname  = dirname(fileURLToPath(import.meta.url));
-const ROOT       = resolve(__dirname, '..');
-const DIST_DIR   = resolve(ROOT, 'dist');
-const ZIP_PATH   = resolve(ROOT, 'CODEX_R_Extension.zip');
-const DB_FILE    = resolve(__dirname, 'usersDb.json');
+const BOT_TOKEN = process.env.BOT_TOKEN || '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
+const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '..');
+const DIST_DIR = resolve(ROOT, 'dist');
+const ZIP_PATH = resolve(ROOT, 'CODEX_R_Extension.zip');
+const DB_FILE = resolve(__dirname, 'usersDb.json');
 
-// Admin / Owner Telegram ID
-const OWNER_ID   = '7794982496';
-const OWNER_LINK = 'https://t.me/SammirContreras';
+// Admin / Owner Telegram IDs
+const OWNER_IDS  = ['7794982496', '7317734631'];
+const OWNER_LINK = 'https://t.me/S_14xx';
+
+export function isOwner(telegramId) {
+  const idStr = String(telegramId).trim();
+  return OWNER_IDS.includes(idStr);
+}
 
 // ─── User Database Manager ───────────────────────────────────────────────────
 
@@ -80,8 +85,8 @@ export function getOrRegisterUser(telegramId, userInfo = {}) {
       telegramId: idStr,
       username,
       name,
-      role: idStr === OWNER_ID ? 'owner' : 'user',
-      planExpiry: idStr === OWNER_ID ? 4102444800000 : null,
+      role: isOwner(idStr) ? 'owner' : 'user',
+      planExpiry: isOwner(idStr) ? 4102444800000 : null,
       createdAt: Date.now(),
     };
     users.push(user);
@@ -90,7 +95,7 @@ export function getOrRegisterUser(telegramId, userInfo = {}) {
     let updated = false;
     if (name && user.name !== name) { user.name = name; updated = true; }
     if (username && user.username !== username) { user.username = username; updated = true; }
-    if (idStr === OWNER_ID && user.role !== 'owner') {
+    if (isOwner(idStr) && user.role !== 'owner') {
       user.role = 'owner';
       user.planExpiry = 4102444800000;
       updated = true;
@@ -103,7 +108,7 @@ export function getOrRegisterUser(telegramId, userInfo = {}) {
 
 export function getVipStatus(user) {
   if (!user) return { hasPlan: false, daysLeft: 0, label: 'Sin Registro' };
-  if (user.telegramId === OWNER_ID || user.role === 'owner') {
+  if (isOwner(user.telegramId) || user.role === 'owner') {
     return { hasPlan: true, daysLeft: 9999, label: 'VIP OWNER (Ilimitado)' };
   }
   if (!user.planExpiry) {
@@ -129,16 +134,16 @@ export function getVipStatus(user) {
 async function apiCall(method, params = {}) {
   const url = `${API_BASE}/${method}`;
   const res = await fetch(url, {
-    method : 'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body   : JSON.stringify(params),
+    body: JSON.stringify(params),
   });
   return res.json();
 }
 
 async function sendMessage(chatId, text, extra = {}) {
   return apiCall('sendMessage', {
-    chat_id   : chatId,
+    chat_id: chatId,
     text,
     parse_mode: 'HTML',
     ...extra,
@@ -171,14 +176,14 @@ async function sendDocument(chatId, filePath, caption = '', extra = {}) {
   form.append('caption', caption);
   form.append('parse_mode', 'HTML');
   form.append('document', createReadStream(filePath), {
-    filename   : 'CODEX_R_Extension.zip',
+    filename: 'CODEX_R_Extension.zip',
     contentType: 'application/zip',
   });
 
   const res = await fetch(`${API_BASE}/sendDocument`, {
-    method : 'POST',
+    method: 'POST',
     headers: form.getHeaders(),
-    body   : form,
+    body: form,
   });
   return res.json();
 }
@@ -283,7 +288,7 @@ async function handleProfile(msg) {
 
 async function handleVipCommand(msg) {
   const chatId = String(msg.chat.id);
-  if (chatId !== OWNER_ID) {
+  if (!isOwner(chatId)) {
     await sendMessage(chatId, '❌ <b>Acceso Denegado.</b> Este comando es exclusivo del Administrador.');
     return;
   }
@@ -358,13 +363,13 @@ async function handleVipCommand(msg) {
         `Ya puedes ingresar tu ID <code>${user.telegramId}</code> en la extensión CODEX(R) para recibir tus códigos OTP.`,
         getActivePlanKeyboard()
       );
-    } catch {}
+    } catch { }
   }
 }
 
 async function handleRemoveVipCommand(msg) {
   const chatId = String(msg.chat.id);
-  if (chatId !== OWNER_ID) {
+  if (!isOwner(chatId)) {
     await sendMessage(chatId, '❌ Acceso denegado.');
     return;
   }
@@ -397,7 +402,7 @@ async function handleRemoveVipCommand(msg) {
 
 async function handleListUsersCommand(msg) {
   const chatId = String(msg.chat.id);
-  if (chatId !== OWNER_ID) {
+  if (!isOwner(chatId)) {
     await sendMessage(chatId, '❌ Acceso denegado.');
     return;
   }
@@ -421,8 +426,8 @@ async function handleListUsersCommand(msg) {
 
 async function handleStatus(msg) {
   const distExists = existsSync(DIST_DIR);
-  const zipExists  = existsSync(ZIP_PATH);
-  const zipSize    = zipExists ? `${(statSync(ZIP_PATH).size / 1024 / 1024).toFixed(1)} MB` : 'N/A';
+  const zipExists = existsSync(ZIP_PATH);
+  const zipSize = zipExists ? `${(statSync(ZIP_PATH).size / 1024 / 1024).toFixed(1)} MB` : 'N/A';
   const usersCount = loadUsersDb().length;
 
   await sendMessage(msg.chat.id,
@@ -461,7 +466,7 @@ async function handleExtension(msg) {
 
   try {
     console.log(`[BOT] Preparando envío de extensión a usuario VIP ${chatId}...`);
-    
+
     // Check if zip exists; build if missing or outdated
     if (!existsSync(ZIP_PATH)) {
       console.log('[BOT] Compilando extensión...');
@@ -530,7 +535,7 @@ async function handleCallbackQuery(query) {
   const data = query.data;
 
   // Answer callback query
-  await apiCall('answerCallbackQuery', { callback_query_id: query.id }).catch(() => {});
+  await apiCall('answerCallbackQuery', { callback_query_id: query.id }).catch(() => { });
 
   if (data === 'check_profile') {
     await handleProfile(query.message);
@@ -547,7 +552,7 @@ async function pollUpdates() {
   try {
     const data = await apiCall('getUpdates', {
       offset,
-      timeout   : 20,
+      timeout: 20,
       allowed_updates: ['message', 'callback_query'],
     });
 
@@ -576,14 +581,14 @@ async function pollUpdates() {
       const lowerText = text.toLowerCase();
       console.log(`[BOT] Mensaje de [${msg.from?.username || msg.from?.id}]: ${text}`);
 
-      if (lowerText.startsWith('/start'))               await handleStart(msg);
+      if (lowerText.startsWith('/start')) await handleStart(msg);
       else if (lowerText.startsWith('/me') || lowerText.startsWith('/perfil')) await handleProfile(msg);
-      else if (lowerText.startsWith('/vip'))            await handleVipCommand(msg);
-      else if (lowerText.startsWith('/removevip'))      await handleRemoveVipCommand(msg);
+      else if (lowerText.startsWith('/vip')) await handleVipCommand(msg);
+      else if (lowerText.startsWith('/removevip')) await handleRemoveVipCommand(msg);
       else if (lowerText.startsWith('/users') || lowerText.startsWith('/admin')) await handleListUsersCommand(msg);
-      else if (lowerText.startsWith('/status'))         await handleStatus(msg);
-      else if (lowerText.startsWith('/extension'))      await handleExtension(msg);
-      else if (lowerText.startsWith('/help'))           await handleHelp(msg);
+      else if (lowerText.startsWith('/status')) await handleStatus(msg);
+      else if (lowerText.startsWith('/extension')) await handleExtension(msg);
+      else if (lowerText.startsWith('/help')) await handleHelp(msg);
     }
   } catch (err) {
     console.error('[BOT] Error de red polling:', err.message);

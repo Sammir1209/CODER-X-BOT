@@ -12,10 +12,15 @@ import {
   saveUsersDb
 } from '../server/botServer.mjs';
 
-const BOT_TOKEN  = '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
+const BOT_TOKEN  = process.env.BOT_TOKEN || '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
 const API_BASE   = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const OWNER_ID   = '7794982496';
-const OWNER_LINK = 'https://t.me/SammirContreras';
+const OWNER_IDS  = ['7794982496', '7317734631'];
+const OWNER_LINK = 'https://t.me/S_14xx';
+
+function isOwner(telegramId) {
+  const idStr = String(telegramId).trim();
+  return OWNER_IDS.includes(idStr);
+}
 
 async function apiCall(method, params = {}) {
   const url = `${API_BASE}/${method}`;
