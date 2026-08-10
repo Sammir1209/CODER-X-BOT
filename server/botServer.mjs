@@ -557,13 +557,13 @@ async function handleStatus(msg) {
     `${EMOJI.CHART} <b>CODEX(R) — ESTADO TÉCNICO DEL SERVIDOR</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
     `${EMOJI.GLOBE} <b>INFRAESTRUCTURA DE RED</b>\n` +
-    ` ├ 🤖 <b>Bot Telegram:</b> @CodexrOutBot\n` +
+    ` ├ ${EMOJI.DESKTOP} <b>Bot Telegram:</b> @CodexrOutBot\n` +
     ` ├ ${EMOJI.LIGHTNING} <b>Health Check Server:</b> <code>Online (Puerto 10000)</code>\n` +
-    ` └ ☁️ <b>Base de Datos:</b> Supabase Connected\n\n` +
-    `📦 <b>SISTEMA Y COMPILACIÓN</b>\n` +
-    ` ├ 📁 <b>Extensión (dist/):</b> ${distExists ? `${EMOJI.CHECK} Compilado` : `${EMOJI.CROSS} Pendiente`}\n` +
-    ` ├ 📦 <b>ZIP VIP:</b> ${zipExists ? `${EMOJI.CHECK} Listo (${zipSize})` : `${EMOJI.CROSS} Sin crear`}\n` +
-    ` └ 👥 <b>Usuarios Registrados:</b> <code>${usersCount}</code>\n\n` +
+    ` └ ${EMOJI.GLOBE} <b>Base de Datos:</b> Supabase Connected\n\n` +
+    `${EMOJI.GEAR} <b>SISTEMA Y COMPILACIÓN</b>\n` +
+    ` ├ ${EMOJI.TAG} <b>Extensión (dist/):</b> ${distExists ? `${EMOJI.CHECK} Compilado` : `${EMOJI.CROSS} Pendiente`}\n` +
+    ` ├ ${EMOJI.TAG} <b>ZIP VIP:</b> ${zipExists ? `${EMOJI.CHECK} Listo (${zipSize})` : `${EMOJI.CROSS} Sin crear`}\n` +
+    ` └ ${EMOJI.EYES} <b>Usuarios Registrados:</b> <code>${usersCount}</code>\n\n` +
     `${EMOJI.CALENDAR} <b>HORA SERVIDOR:</b> <code>${new Date().toLocaleString('es-MX')}</code>`
   );
 }
@@ -608,18 +608,18 @@ async function handleExtension(msg) {
 
     const zipSize = existsSync(ZIP_PATH) ? (statSync(ZIP_PATH).size / 1024 / 1024).toFixed(1) : '1.5';
     const caption =
-      `📦 <b>CODEX(R) — PAQUETE DE EXTENSIÓN VIP (V1.1)</b>\n` +
+      `${EMOJI.STAR} <b>CODEX(R) — PAQUETE DE EXTENSIÓN VIP (V1.1)</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `👤 <b>USUARIO AUTORIZADO</b>\n` +
-      ` ├ 👤 <b>Operador:</b> ${user.name}\n` +
-      ` ├ ⏳ <b>Membresía:</b> ${status.label}\n` +
-      ` └ 📁 <b>Tamaño Paquete:</b> <code>${zipSize} MB</code>\n\n` +
-      `🚀 <b>GUÍA RÁPIDA DE INSTALACIÓN</b>\n` +
-      ` 1️⃣ <b>Descomprime</b> el archivo <code>CODEX_R_Extension.zip</code>.\n` +
-      ` 2️⃣ Abre Chrome e ingresa a <code>chrome://extensions</code>.\n` +
-      ` 3️⃣ Activa el <b>"Modo desarrollador"</b> arriba a la derecha.\n` +
-      ` 4️⃣ Haz clic en <b>"Cargar extensión sin empaquetar"</b> y selecciona la carpeta.\n` +
-      ` 5️⃣ Abre la extensión e ingresa tu ID <code>${chatId}</code>.\n\n` +
+      `${EMOJI.STAR} <b>USUARIO AUTORIZADO</b>\n` +
+      ` ├ ${EMOJI.PIN} <b>Operador:</b> ${user.name}\n` +
+      ` ├ ${EMOJI.CALENDAR} <b>Membresía:</b> ${status.label}\n` +
+      ` └ ${EMOJI.TAG} <b>Tamaño Paquete:</b> <code>${zipSize} MB</code>\n\n` +
+      `${EMOJI.FIRE} <b>GUÍA RÁPIDA DE INSTALACIÓN</b>\n` +
+      ` ${EMOJI.ARROW} <b>1. Descomprime</b> el archivo <code>CODEX_R_Extension.zip</code>.\n` +
+      ` ${EMOJI.ARROW} <b>2. Abre Chrome</b> e ingresa a <code>chrome://extensions</code>.\n` +
+      ` ${EMOJI.ARROW} <b>3. Activa</b> el <b>"Modo desarrollador"</b> arriba a la derecha.\n` +
+      ` ${EMOJI.ARROW} <b>4. Haz clic</b> en <b>"Cargar extensión sin empaquetar"</b> y selecciona la carpeta.\n` +
+      ` ${EMOJI.ARROW} <b>5. Abre la extensión</b> e ingresa tu ID <code>${chatId}</code>.\n\n` +
       `${EMOJI.LOCK} <i>Paquete cifrado exclusivo para miembros VIP.</i>`;
 
     const res = await sendDocument(chatId, ZIP_PATH, caption);
