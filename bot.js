@@ -1,5 +1,5 @@
 /**
  * CODEX(R) — Root Entry Point for Telegram Bot
- * Allows running `node bot` or `node bot.js` directly from project root.
+ * Runs modular bot architecture from ./bot/index.mjs
  */
-import './server/botServer.mjs';
+import './bot/index.mjs';
