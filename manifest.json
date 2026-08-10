@@ -1,0 +1,78 @@
+{
+  "manifest_version": 3,
+  "name": "CODEX(R)",
+  "version": "1.0.0",
+  "description": "CODEX(R) - Plataforma de extensión para automatización y control de pruebas.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "CODEX(R)"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "https://*/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": ["stripe-main.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    }
+  ],
+  "permissions": [
+    "webNavigation",
+    "storage",
+    "activeTab",
+    "scripting",
+    "alarms",
+    "downloads",
+    "clipboardWrite",
+    "proxy",
+    "webRequest",
+    "webRequestAuthProvider",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "*://*.stripe.com/*",
+    "*://buy.stripe.com/*",
+    "*://checkout.stripe.com/*",
+    "*://invoice.stripe.com/*",
+    "*://api.stripe.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "models/*.ort",
+        "assets/*.wasm",
+        "assets/*",
+        "success.mp3"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}
