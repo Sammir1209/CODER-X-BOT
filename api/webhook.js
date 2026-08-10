@@ -49,13 +49,13 @@ function getNoPlanKeyboard() {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: '💳 Comprar Plan VIP con @S_14xx', url: OWNER_1_LINK },
+          { text: '🔹 COMPRAR PLAN | @S_14xx 🔹', url: OWNER_1_LINK },
         ],
         [
-          { text: '💳 Comprar Plan VIP con @mrcodexofc', url: OWNER_2_LINK },
+          { text: '🔹 COMPRAR PLAN | @mrcodexofc 🔹', url: OWNER_2_LINK },
         ],
         [
-          { text: '👤 Ver Mi Perfil / Estado', callback_data: 'check_profile' },
+          { text: '👤 MI PERFIL / ESTADO', callback_data: 'check_profile' },
         ],
       ],
     },
@@ -67,11 +67,11 @@ function getActivePlanKeyboard() {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: '👑 Owner @S_14xx', url: OWNER_1_LINK },
-          { text: '👑 Owner @mrcodexofc', url: OWNER_2_LINK },
+          { text: '👑 OWNER | @S_14xx', url: OWNER_1_LINK },
+          { text: '👑 OWNER | @mrcodexofc', url: OWNER_2_LINK },
         ],
         [
-          { text: '👤 Ver Mi Perfil / Estado', callback_data: 'check_profile' },
+          { text: '👤 MI PERFIL / ESTADO', callback_data: 'check_profile' },
         ],
       ],
     },
