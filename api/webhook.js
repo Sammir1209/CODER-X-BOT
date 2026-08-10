@@ -12,9 +12,9 @@ import {
   saveUsersDb
 } from '../server/botServer.mjs';
 
-const BOT_TOKEN  = process.env.BOT_TOKEN || '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
-const API_BASE   = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const OWNER_IDS  = ['7794982496', '7317734631'];
+const BOT_TOKEN = process.env.BOT_TOKEN || '8953633941:AAE8E0o00iIlVBnP57_y3Q8UIk5I_-ZwRCw';
+const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const OWNER_IDS = ['7794982496', '7317734631'];
 const OWNER_LINK = 'https://t.me/S_14xx';
 
 function isOwner(telegramId) {
@@ -25,16 +25,16 @@ function isOwner(telegramId) {
 async function apiCall(method, params = {}) {
   const url = `${API_BASE}/${method}`;
   const res = await fetch(url, {
-    method : 'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body   : JSON.stringify(params),
+    body: JSON.stringify(params),
   });
   return res.json();
 }
 
 async function sendMessage(chatId, text, extra = {}) {
   return apiCall('sendMessage', {
-    chat_id   : chatId,
+    chat_id: chatId,
     text,
     parse_mode: 'HTML',
     ...extra,
@@ -43,6 +43,31 @@ async function sendMessage(chatId, text, extra = {}) {
 
 const OWNER_1_LINK = 'https://t.me/S_14xx';
 const OWNER_2_LINK = 'https://t.me/mrcodexofc';
+
+const EMOJI = {
+  LIGHTNING: '<tg-emoji emoji-id="5456140674028019486">⚡️</tg-emoji>',
+  DIAMOND:   '<tg-emoji emoji-id="5427168083074628963">💎</tg-emoji>',
+  CROWN:     '<tg-emoji emoji-id="5217822164362739968">👑</tg-emoji>',
+  SHIELD:    '<tg-emoji emoji-id="5251203410396458957">🛡</tg-emoji>',
+  LOCK:      '<tg-emoji emoji-id="5296369303661067030">🔒</tg-emoji>',
+  GEAR:      '<tg-emoji emoji-id="5341715473882955310">⚙️</tg-emoji>',
+  CHART:     '<tg-emoji emoji-id="5231200819986047254">📊</tg-emoji>',
+  GREEN:     '<tg-emoji emoji-id="5416081784641168838">🟢</tg-emoji>',
+  RED:       '<tg-emoji emoji-id="5411225014148014586">🔴</tg-emoji>',
+  ARROW:     '<tg-emoji emoji-id="5416117059207572332">➡️</tg-emoji>',
+  PIN:       '<tg-emoji emoji-id="5397782960512444700">📌</tg-emoji>',
+  CALENDAR:  '<tg-emoji emoji-id="5413879192267805083">🗓</tg-emoji>',
+  SPARKLES:  '<tg-emoji emoji-id="5325547803936572038">✨</tg-emoji>',
+  STAR:      '<tg-emoji emoji-id="5438496463044752972">⭐️</tg-emoji>',
+  PLUS:      '<tg-emoji emoji-id="5397916757333654639">➕</tg-emoji>',
+  INFO:      '<tg-emoji emoji-id="5334544901428229844">ℹ️</tg-emoji>',
+  CHAT:      '<tg-emoji emoji-id="5443038326535759644">💬</tg-emoji>',
+  GLOBE:     '<tg-emoji emoji-id="5447410659077661506">🌐</tg-emoji>',
+  WARNING:   '<tg-emoji emoji-id="5447644880824181073">⚠️</tg-emoji>',
+  CROSS:     '<tg-emoji emoji-id="5210952531676504517">❌</tg-emoji>',
+  CHECK:     '<tg-emoji emoji-id="5206607081334906820">✔️</tg-emoji>',
+  PARTY:     '<tg-emoji emoji-id="5461151367559141950">🎉</tg-emoji>',
+};
 
 function getNoPlanKeyboard() {
   return {
@@ -67,8 +92,8 @@ function getActivePlanKeyboard() {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: '👑 OWNER | @S_14xx', url: OWNER_1_LINK },
-          { text: '👑 OWNER | @mrcodexofc', url: OWNER_2_LINK },
+          { text: '👑 DEV', url: OWNER_1_LINK },
+          { text: '👑 ADMIN', url: OWNER_2_LINK },
         ],
         [
           { text: '👤 MI PERFIL / ESTADO', callback_data: 'check_profile' },
