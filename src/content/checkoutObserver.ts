@@ -198,7 +198,7 @@ export class CheckoutObserver {
     // ── 4. DECLINED signals ──
     const declinedPatterns = [
       /card.*(declined|rechazada)/i,
-      /payment.*declined/i,
+      /payment.*(declined|failed|error)/i,
       /tarjeta.*rechaz/i,
       /your\s*card\s*was\s*declined/i,
       /la\s*tarjeta.*rechaz/i,
@@ -226,6 +226,13 @@ export class CheckoutObserver {
       /authentication\s*failed/i,
       /3d\s*secure.*not\s*supported/i,
       /autenticaci[oó]n\s*fall/i,
+      /declined/i,
+      /rechazad/i,
+      /failed/i,
+      /fallo/i,
+      /invalid/i,
+      /incorrect/i,
+      /refused/i,
     ];
 
     if (declinedPatterns.some(p => p.test(pageText))) {
@@ -248,14 +255,14 @@ export class CheckoutObserver {
       return 'ERROR';
     }
 
-    // ── 6. Stripe-specific error classes ──
+    // ── 6. Instant Decline Evaluation on Any Visible Error Elements ──
     const stripeErrors = document.querySelectorAll(
-      '.StripeElement--invalid, [class*="Error"], [class*="error-message"], [class*="alert-danger"], [role="alert"]'
+      '.StripeElement--invalid, [class*="Error"], [class*="error-message"], [class*="alert-danger"], [role="alert"], [class*="field-error"], [id*="error"]'
     );
 
     for (const errEl of stripeErrors) {
-      const errText = (errEl.textContent || '').toLowerCase();
-      if (declinedPatterns.some(p => p.test(errText))) {
+      const errText = (errEl.textContent || '').trim().toLowerCase();
+      if (errText.length > 2) {
         return 'DECLINED';
       }
     }

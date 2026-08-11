@@ -76,13 +76,13 @@ export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];
 // ─── Timing Constants ─────────────────────────────────────────────────────────
 export const TIMING = {
   /** Delay between test cards in auto-loop (ms) */
-  INTER_CARD_DELAY: 400,
+  INTER_CARD_DELAY: 150,
   /** Delay waiting for dynamic billing fields to appear (ms) */
-  BILLING_FIELDS_DELAY: 2000,
+  BILLING_FIELDS_DELAY: 1000,
   /** Default checkout observer timeout (ms) */
-  OBSERVER_TIMEOUT: 20000,
+  OBSERVER_TIMEOUT: 4000,
   /** Overlay poll interval for SPA detection (ms) */
-  SPA_POLL_INTERVAL: 2000,
+  SPA_POLL_INTERVAL: 1000,
   /** Service worker keepalive alarm (minutes) */
   KEEPALIVE_INTERVAL_MIN: 1,
   /** OTP expiration time (ms) — 5 minutes */

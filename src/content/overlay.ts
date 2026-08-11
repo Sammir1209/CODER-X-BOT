@@ -136,59 +136,59 @@ export class CODEROverlay {
 
   private buildHTML(): string {
     return `
-      <div id="CODER-panel" style="width:230px;background:#0b0d14;border:1px solid #1a1d29;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.8);overflow:hidden;user-select:none;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e2e8f0;padding:12px;">
+      <div id="CODER-panel" style="width:235px;background:#030407;border:1px solid #1c1f2e;border-radius:14px;box-shadow:0 25px 60px rgba(0,0,0,0.95), 0 0 1px rgba(255,255,255,0.1);overflow:hidden;user-select:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#ffffff;padding:12px;backdrop-filter:blur(16px);">
         
         <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:grab;" id="CODER-header">
-          <div>
-            <div style="font-size:11px;font-weight:900;letter-spacing:1.5px;color:#ffffff;line-height:1.1;text-transform:uppercase;">CODEX(R)</div>
-            <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:#38bdf8;opacity:0.9;" id="CODER-provider">DETECTED STRIPE</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:grab;" id="CODER-header">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:7px;height:7px;border-radius:50%;background:#ffffff;box-shadow:0 0 8px #ffffff;"></div>
+            <div style="font-size:11px;font-weight:900;letter-spacing:1.5px;color:#ffffff;line-height:1;text-transform:uppercase;">CODEX®</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <div style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></div>
-            <button id="CODER-btn-toggle" style="width:22px;height:22px;border-radius:6px;background:#161922;border:1px solid #232736;color:#94a3b8;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;" title="Minimize">—</button>
+            <span style="font-size:8px;font-weight:800;letter-spacing:1px;color:#a1a1aa;text-transform:uppercase;" id="CODER-provider">STRIPE</span>
+            <button id="CODER-btn-toggle" style="width:20px;height:20px;border-radius:6px;background:#0d0e14;border:1px solid #27273a;color:#ffffff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;" title="Minimize">—</button>
           </div>
         </div>
 
         <!-- Detected Gateway Badge Banner -->
-        <div id="CODER-gateway-badge" style="font-size:9px;font-weight:900;letter-spacing:1.2px;color:#34d399;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);padding:4px 8px;border-radius:7px;text-align:center;margin-bottom:10px;text-transform:uppercase;font-family:monospace;">
-          DETECTED STRIPE
+        <div id="CODER-gateway-badge" style="font-size:9px;font-weight:900;letter-spacing:1.5px;color:#ffffff;background:#090b12;border:1px solid #222538;padding:5px 8px;border-radius:8px;text-align:center;margin-bottom:10px;text-transform:uppercase;font-family:monospace;">
+          DETECTED GATEWAY
         </div>
 
         <!-- Collapsible Content -->
         <div id="CODER-body">
           <!-- Card Info Box (TRYING 1) -->
-          <div style="background:#11141d;border:1px solid #1e2230;border-radius:10px;padding:10px;margin-bottom:8px;">
-            <div style="font-size:8px;font-weight:800;letter-spacing:1px;color:#6366f1;text-transform:uppercase;margin-bottom:3px;">TRYING 1</div>
-            <div id="CODER-current-card" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:11px;font-weight:700;color:#f8fafc;letter-spacing:0.5px;">—</div>
+          <div style="background:#08090f;border:1px solid #1b1e2d;border-radius:10px;padding:9px 10px;margin-bottom:8px;">
+            <div style="font-size:8px;font-weight:800;letter-spacing:1px;color:#71717a;text-transform:uppercase;margin-bottom:3px;">PROBANDO TARJETA</div>
+            <div id="CODER-current-card" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:11px;font-weight:700;color:#ffffff;letter-spacing:0.8px;">—</div>
           </div>
 
           <!-- Attempts Counter (ATTEMPTS 1) -->
-          <div style="background:#11141d;border:1px solid #1e2230;border-radius:10px;padding:10px;margin-bottom:8px;">
-            <div style="font-size:8px;font-weight:800;letter-spacing:1px;color:#475569;text-transform:uppercase;margin-bottom:2px;">ATTEMPTS</div>
-            <div id="CODER-progress-text" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:20px;font-weight:900;color:#ffffff;line-height:1;">1</div>
+          <div style="background:#08090f;border:1px solid #1b1e2d;border-radius:10px;padding:9px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:8px;font-weight:800;letter-spacing:1px;color:#71717a;text-transform:uppercase;">PROGRESO</div>
+            <div id="CODER-progress-text" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:16px;font-weight:900;color:#ffffff;line-height:1;">1 / 1</div>
           </div>
 
           <!-- Stats Pill Row -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px;">
-            <div style="background:#11141d;border:1px solid #1e2230;border-radius:8px;padding:5px 2px;text-align:center;">
-              <div style="font-size:7px;color:#34d399;font-weight:800;letter-spacing:0.5px;">HIT</div>
-              <div id="CODER-hits" style="font-size:12px;font-weight:900;color:#34d399;font-family:monospace;">0</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px;">
+            <div style="background:#08090f;border:1px solid #16241a;border-radius:8px;padding:6px 2px;text-align:center;">
+              <div style="font-size:7px;color:#4ade80;font-weight:900;letter-spacing:0.5px;">HIT</div>
+              <div id="CODER-hits" style="font-size:13px;font-weight:900;color:#4ade80;font-family:monospace;margin-top:1px;">0</div>
             </div>
-            <div style="background:#11141d;border:1px solid #1e2230;border-radius:8px;padding:5px 2px;text-align:center;">
-              <div style="font-size:7px;color:#f87171;font-weight:800;letter-spacing:0.5px;">DEC</div>
-              <div id="CODER-declined" style="font-size:12px;font-weight:900;color:#f87171;font-family:monospace;">0</div>
+            <div style="background:#08090f;border:1px solid #2c1718;border-radius:8px;padding:6px 2px;text-align:center;">
+              <div style="font-size:7px;color:#f87171;font-weight:900;letter-spacing:0.5px;">DEC</div>
+              <div id="CODER-declined" style="font-size:13px;font-weight:900;color:#f87171;font-family:monospace;margin-top:1px;">0</div>
             </div>
-            <div style="background:#11141d;border:1px solid #1e2230;border-radius:8px;padding:5px 2px;text-align:center;">
-              <div style="font-size:7px;color:#fbbf24;font-weight:800;letter-spacing:0.5px;">3DS</div>
-              <div id="CODER-threeds" style="font-size:16px;font-weight:900;color:#fbbf24;font-family:monospace;">0</div>
+            <div style="background:#08090f;border:1px solid #2d2410;border-radius:8px;padding:6px 2px;text-align:center;">
+              <div style="font-size:7px;color:#fbbf24;font-weight:900;letter-spacing:0.5px;">3DS</div>
+              <div id="CODER-threeds" style="font-size:13px;font-weight:900;color:#fbbf24;font-family:monospace;margin-top:1px;">0</div>
             </div>
           </div>
 
           <!-- Source Box (SOURCE BIN GEN) -->
-          <div style="background:#11141d;border:1px solid #1e2230;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span style="font-size:8px;font-weight:800;letter-spacing:1px;color:#475569;text-transform:uppercase;">SOURCE</span>
-            <span id="CODER-status-badge" style="font-size:9px;font-weight:900;letter-spacing:1px;color:#6366f1;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);padding:3px 10px;border-radius:8px;text-transform:uppercase;">BIN GEN</span>
+          <div style="background:#08090f;border:1px solid #1b1e2d;border-radius:10px;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:8px;font-weight:800;letter-spacing:1px;color:#71717a;text-transform:uppercase;">ORIGEN</span>
+            <span id="CODER-status-badge" style="font-size:8px;font-weight:900;letter-spacing:1px;color:#ffffff;background:#181824;border:1px solid #2e2e46;padding:3px 8px;border-radius:6px;text-transform:uppercase;">BIN GEN</span>
           </div>
 
           <!-- Hidden test case select -->
@@ -196,10 +196,10 @@ export class CODEROverlay {
 
           <!-- Action Control Buttons -->
           <div style="display:flex;gap:6px;">
-            <button id="CODER-btn-start" style="flex:1;background:#161924;border:1px solid #282e42;color:#ffffff;border-radius:9px;padding:9px 6px;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;">▶ START</button>
-            <button id="CODER-btn-pause" style="flex:1;background:#161924;border:1px solid #282e42;color:#ffffff;border-radius:9px;padding:9px 6px;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;">■ PAUSE</button>
-            <button id="CODER-btn-skip" style="width:32px;background:#161924;border:1px solid #282e42;color:#818cf8;border-radius:9px;padding:9px 2px;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;" title="Skip Card">⏭</button>
-            <button id="CODER-btn-stop" style="flex:1;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:9px;padding:9px 6px;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;">■ STOP</button>
+            <button id="CODER-btn-start" style="flex:1;background:#ffffff;border:1px solid #ffffff;color:#000000;border-radius:9px;padding:9px 6px;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;transition:all 0.15s ease;">▶ START</button>
+            <button id="CODER-btn-pause" style="flex:1;background:#181824;border:1px solid #32324a;color:#ffffff;border-radius:9px;padding:9px 6px;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;">■ PAUSE</button>
+            <button id="CODER-btn-skip" style="width:32px;background:#181824;border:1px solid #32324a;color:#ffffff;border-radius:9px;padding:9px 2px;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;" title="Skip Card">⏭</button>
+            <button id="CODER-btn-stop" style="flex:1;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:9px;padding:9px 6px;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;">■ STOP</button>
           </div>
         </div>
 
@@ -211,7 +211,7 @@ export class CODEROverlay {
     const style = document.createElement('style');
     style.textContent = `
       * { box-sizing: border-box; }
-      button:hover { filter: brightness(1.2); }
+      #CODER-btn-start:hover { background: #e2e8f0; transform: translateY(-1px); }
       button:active { transform: scale(0.96); }
       @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
     `;
