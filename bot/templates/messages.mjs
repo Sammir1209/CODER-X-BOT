@@ -286,7 +286,7 @@ export function renderCheckerMessage(url, data) {
     `${field('Checkout Activo', `${statusIcon} <b>${data.hasCheckout ? 'SÍ (Formulario Detectado)' : 'NO'}</b>`)}\n` +
     `${field('Protección 3D Secure', data.has3DS ? `${EMOJI.WARNING} <b>ACTIVA (3DS 2.0 / EMVCo)</b>` : `${EMOJI.CHECK} <i>No requerida / Estándar</i>`)}\n` +
     `${field('Captcha Guard', data.hasCaptcha ? `${EMOJI.LOCK} <b>hCaptcha / reCAPTCHA Detectado</b>` : `${EMOJI.CHECK} <i>Sin Captcha activo</i>`)}\n` +
-    `${field('Campos Detectados', `<code>${data.fieldsCount || 0} inputs`)}`\n` +
+    `${field('Campos Detectados', `<code>${data.fieldsCount || 0} inputs</code>`)}\n` +
     `\n${DECO.LINE_THIN}\n` +
     `\n` +
     `${EMOJI.SHIELD} <b>Recomendación CODEX®</b> ${DECO.ARROW_FANCY}\n` +
