@@ -5,7 +5,7 @@ import { storageSet, storageGetMultiple } from '../../utils/storageAdapter';
 import { STORAGE_KEYS } from '../../utils/constants';
 import type { IdentitySettings } from '../../types/checkout';
 import { DEFAULT_IDENTITY } from '../../types/checkout';
-import { generateRandomIdentity, ensureCompleteIdentity, COUNTRIES_WITH_FLAGS } from '../../utils/identityGenerator';
+import { generateRandomIdentity, COUNTRIES_WITH_FLAGS } from '../../utils/identityGenerator';
 
 export const OptionsPage: React.FC = () => {
   // Automation & AI states
@@ -54,14 +54,14 @@ export const OptionsPage: React.FC = () => {
 
       const idObj = res[STORAGE_KEYS.IDENTITY] as IdentitySettings | undefined;
       if (idObj) {
-        setEmail(idObj.email || DEFAULT_IDENTITY.email);
-        setBillingName(idObj.billingName || DEFAULT_IDENTITY.billingName);
+        setEmail(idObj.email || '');
+        setBillingName(idObj.billingName || '');
         setPhone(idObj.phone || '');
-        setAddress1(idObj.address1 || DEFAULT_IDENTITY.address1);
+        setAddress1(idObj.address1 || '');
         setAddress2(idObj.address2 || '');
-        setCity(idObj.city || DEFAULT_IDENTITY.city);
+        setCity(idObj.city || '');
         setState(idObj.state || '');
-        setCountry(idObj.country || DEFAULT_IDENTITY.country);
+        setCountry(idObj.country || 'United States');
         setZipCode(idObj.zipCode || '');
         setDelay(idObj.delay ?? DEFAULT_IDENTITY.delay);
       }
@@ -85,8 +85,8 @@ export const OptionsPage: React.FC = () => {
   const handleSaveIdentity = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Auto-fill ANY missing/empty fields with realistic random data based on selected country
-    const completeIdentity = ensureCompleteIdentity({
+    // Save identity preferences directly without forced text injection into empty inputs
+    const identityToSave: IdentitySettings = {
       email,
       billingName,
       phone,
@@ -97,20 +97,9 @@ export const OptionsPage: React.FC = () => {
       country: country || 'United States',
       zipCode,
       delay,
-    });
+    };
 
-    // Update state so the user sees the filled values in the form
-    setEmail(completeIdentity.email);
-    setBillingName(completeIdentity.billingName);
-    setPhone(completeIdentity.phone || '');
-    setAddress1(completeIdentity.address1);
-    setAddress2(completeIdentity.address2 || '');
-    setCity(completeIdentity.city);
-    setState(completeIdentity.state || '');
-    setCountry(completeIdentity.country);
-    setZipCode(completeIdentity.zipCode || '');
-
-    await storageSet(STORAGE_KEYS.IDENTITY, completeIdentity);
+    await storageSet(STORAGE_KEYS.IDENTITY, identityToSave);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
   };
@@ -349,19 +338,21 @@ export const OptionsPage: React.FC = () => {
                   type="text"
                   value={billingName}
                   onChange={(e) => setBillingName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500"
+                  placeholder="John Doe"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 placeholder-slate-600"
                 />
               </div>
 
               <div>
                 <label className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mb-1">
-                  <Mail className="w-3 h-3 text-indigo-400" /> Correo Electrónico:
+                  <Mail className="w-3 h-3 text-indigo-400" /> EMAIL:
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500"
+                  placeholder="user@example.com"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 placeholder-slate-600"
                 />
               </div>
             </div>
@@ -369,46 +360,24 @@ export const OptionsPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mb-1">
-                  <PhoneIcon className="w-3 h-3 text-indigo-400" /> Teléfono:
+                  <PhoneIcon className="w-3 h-3 text-indigo-400" /> TELÉFONO:
                 </label>
                 <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="9145550192"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 font-mono"
+                  placeholder="3055550192"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 font-mono placeholder-slate-600"
                 />
               </div>
 
               <div>
                 <label className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mb-1">
-                  <Globe className="w-3 h-3 text-indigo-400" /> País de Identidad & ZIP AVS:
+                  <Globe className="w-3 h-3 text-indigo-400" /> COUNTRY (PAÍS):
                 </label>
                 <select
                   value={country}
-                  onChange={(e) => {
-                    const newCountry = e.target.value;
-                    setCountry(newCountry);
-                    // If fields are empty or user switched country, fill missing fields with new country data
-                    const updated = ensureCompleteIdentity({
-                      email,
-                      billingName,
-                      phone,
-                      address1,
-                      address2,
-                      city,
-                      state,
-                      country: newCountry,
-                      zipCode,
-                    });
-                    if (!billingName) setBillingName(updated.billingName);
-                    if (!email) setEmail(updated.email);
-                    if (!phone) setPhone(updated.phone || '');
-                    if (!address1) setAddress1(updated.address1);
-                    if (!city) setCity(updated.city);
-                    if (!state) setState(updated.state || '');
-                    if (!zipCode) setZipCode(updated.zipCode || '');
-                  }}
+                  onChange={(e) => setCountry(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 font-semibold cursor-pointer"
                 >
                   {COUNTRIES_WITH_FLAGS.map((c) => (
@@ -417,69 +386,68 @@ export const OptionsPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <span className="text-[9px] text-indigo-400 font-medium block mt-1">
-                  ✨ <i>Los campos dejados en blanco se autogenerarán con ZIP, ciudad y datos reales de este país.</i>
-                </span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mb-1">
-                  <MapPin className="w-3 h-3 text-indigo-400" /> Dirección Línea 1:
+                  <MapPin className="w-3 h-3 text-indigo-400" /> ADDRESS LINE 1:
                 </label>
                 <input
                   type="text"
                   value={address1}
                   onChange={(e) => setAddress1(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500"
+                  placeholder="123 Main St"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 placeholder-slate-600"
                 />
               </div>
 
               <div>
                 <label className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mb-1">
-                  Dirección Línea 2 (Opcional):
+                  ADDRESS LINE 2 (OPCIONAL):
                 </label>
                 <input
                   type="text"
                   value={address2}
                   onChange={(e) => setAddress2(e.target.value)}
-                  placeholder="Apt, Suite, Edificio"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500"
+                  placeholder="Apt 1"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 placeholder-slate-600"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="text-[10px] text-slate-400 font-bold block mb-1">Ciudad:</label>
+                <label className="text-[10px] text-slate-400 font-bold block mb-1">CITY:</label>
                 <input
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500"
+                  placeholder="New York"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 placeholder-slate-600"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] text-slate-400 font-bold block mb-1">Estado / Prov.:</label>
+                <label className="text-[10px] text-slate-400 font-bold block mb-1">ESTADO / PROV.:</label>
                 <input
                   type="text"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  placeholder="IL, NY, etc."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500"
+                  placeholder="NY"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 placeholder-slate-600"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] text-slate-400 font-bold block mb-1">Código Postal (Zip):</label>
+                <label className="text-[10px] text-slate-400 font-bold block mb-1">ZIP / POSTAL CODE:</label>
                 <input
                   type="text"
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   placeholder="10001"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 font-mono outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 font-mono outline-none focus:border-indigo-500 placeholder-slate-600"
                 />
               </div>
             </div>

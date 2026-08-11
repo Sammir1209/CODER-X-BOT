@@ -125,15 +125,15 @@ export interface IdentitySettings {
 }
 
 export const DEFAULT_IDENTITY: IdentitySettings = {
-  email: 'user@example.com',
-  billingName: 'John Doe',
-  phone: '9145550192',
-  address1: '742 Evergreen Terrace',
-  address2: 'Apt 4B',
-  city: 'Springfield',
-  state: 'IL',
+  email: '',
+  billingName: '',
+  phone: '',
+  address1: '',
+  address2: '',
+  city: '',
+  state: '',
   country: 'United States',
-  zipCode: '10001',
+  zipCode: '',
   delay: 2,
 };
 
