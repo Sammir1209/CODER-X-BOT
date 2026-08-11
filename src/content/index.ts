@@ -17,13 +17,15 @@ import { sendTelegramBatchSummary } from '../utils/telegramNotifier';
 import { storageGet } from '../utils/storageAdapter';
 import { STORAGE_KEYS, TIMING } from '../utils/constants';
 import type { ExecutionState, PaymentResultStatus } from '../types/checkout';
+import { startSaveCardSuppressor } from './saveCardSuppressor';
 import type { TestCase } from '../types/testCase';
 
 console.log('[CODER] Content script initialized on:', window.location.hostname);
 
-// Set up messaging & Captcha auto-clicker for all frames (top + iframes)
+// Set up messaging, Captcha auto-clicker & Save-Card prompt suppressor for all frames (top + iframes)
 setupContentScriptMessaging();
 startCaptchaAutoClicker();
+startSaveCardSuppressor();
 
 // Only run overlay & auto-test in the top window
 const isTopWindow = window === window.top;

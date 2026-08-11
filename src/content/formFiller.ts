@@ -17,6 +17,7 @@ import type { IdentitySettings } from '../types/checkout';
 import { DEFAULT_IDENTITY } from '../types/checkout';
 import { ensureCompleteIdentity } from '../utils/identityGenerator';
 import { querySelectorIncludingShadow } from '../utils/domHelper';
+import { sanitizeInputElement } from './saveCardSuppressor';
 
 // ─── Country and State Maps for Select Dropdowns ────────────────────────────────
 
@@ -134,9 +135,7 @@ function setNativeInputValue(
 
   // Suppress browser "Save card?" prompt (Brave/Chrome autofill popups)
   try {
-    inputEl.setAttribute('autocomplete', 'off');
-    inputEl.setAttribute('data-bwignore', 'true');
-    inputEl.setAttribute('data-lpignore', 'true');
+    sanitizeInputElement(inputEl);
   } catch {}
 
   // Ultra-fast value assignment via prototype setter & instant event dispatching
