@@ -367,13 +367,13 @@ export async function handleChkCommand(msg) {
   const chatId = String(msg.chat.id);
   const text = msg.text.trim();
 
-  // Extract URL from command text (handles /chk https://... or /chk@bot https://... or /chk domain.com)
-  const urlMatch = text.match(/(https?:\/\/[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/i);
-  const matchedPart = urlMatch ? urlMatch[0] : '';
-  // Ensure we didn't just match '/chk'
-  const isCmdOnly = matchedPart.toLowerCase().startsWith('/chk') || matchedPart.toLowerCase().startsWith('/check') || matchedPart.toLowerCase().startsWith('/scan');
+  // Split by whitespace to get command and arguments
+  const parts = text.split(/\s+/);
+  
+  // URL is expected to be in the second argument (e.g. "/chk https://example.com" or "/chk@bot example.com")
+  let urlInput = parts.slice(1).join(' ').trim();
 
-  if (!urlMatch || isCmdOnly) {
+  if (!urlInput) {
     await sendMessage(chatId,
       `${EMOJI.INFO} <b>CODEX® CHECKER — SINTAXIS DE USO</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
@@ -384,7 +384,10 @@ export async function handleChkCommand(msg) {
     return;
   }
 
-  let targetUrl = matchedPart.replace(/[>\]\)\'\"]+$/, '');
+  // Remove any trailing or leading quotes/brackets
+  urlInput = urlInput.replace(/^[<"']+|[>\"']+$/g, '');
+
+  let targetUrl = urlInput;
   if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
     targetUrl = `https://${targetUrl}`;
   }
@@ -393,7 +396,7 @@ export async function handleChkCommand(msg) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const resp = await fetch(targetUrl, {
       signal: controller.signal,
@@ -443,7 +446,7 @@ export async function handleBroadcastCommand(msg) {
     return;
   }
 
-  const broadcastText = msg.text.replace(/^\/broadcast\s*/i, '').trim();
+  const broadcastText = msg.text.replace(/^\/(broadcast|anuncio)(@\w+)?\s*/i, '').trim();
   if (!broadcastText) {
     await sendMessage(chatId, `${EMOJI.INFO} Uso: <code>/broadcast [Mensaje con formato HTML]</code>`);
     return;
