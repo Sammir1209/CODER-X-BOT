@@ -4,6 +4,9 @@ import { DIST_DIR, ROOT_DIR, ZIP_PATH } from '../config/constants.mjs';
 import { EMOJI } from '../templates/emojis.mjs';
 import { getActivePlanKeyboard, getNoPlanKeyboard } from '../templates/keymaps.mjs';
 import {
+  renderBroadcastMessage,
+  renderCardGeneratorMessage,
+  renderCheckerMessage,
   renderExtensionCaption,
   renderHelpMessage,
   renderProfileMessage,
@@ -14,6 +17,7 @@ import {
   renderVipGrantedOwnerMessage,
   renderVipGrantedUserMessage
 } from '../templates/messages.mjs';
+import { generateCards } from '../services/cardService.mjs';
 import {
   getOrRegisterUser,
   getVipStatus,
@@ -321,4 +325,138 @@ export async function handleHelp(msg) {
   const userId = String(from.id || msg.chat.id);
   const isOwnerUser = isOwner(userId);
   await sendMessage(chatId, renderHelpMessage(isOwnerUser));
+}
+
+export async function handleGenCommand(msg) {
+  const chatId = String(msg.chat.id);
+  const text = msg.text.trim();
+  const parts = text.split(/\s+/);
+
+  if (parts.length < 2) {
+    await sendMessage(chatId,
+      `${EMOJI.INFO} <b>CODEX® GENERATOR — SINTAXIS DE USO</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `Sintaxis: <code>/gen [BIN] [cantidad]</code>\n\n` +
+      `Ejemplos:\n` +
+      `• <code>/gen 453590</code> (Genera 10 por defecto)\n` +
+      `• <code>/gen 520081 15</code> (Genera 15 tarjetas)`
+    );
+    return;
+  }
+
+  const binInput = parts[1].replace(/\D/g, '');
+  const countInput = parts[2] ? parseInt(parts[2], 10) : 10;
+
+  if (!binInput || binInput.length < 4) {
+    await sendMessage(chatId, `${EMOJI.CROSS} <b>Error:</b> El BIN debe contener al menos 4 números dígitos.`);
+    return;
+  }
+
+  const count = isNaN(countInput) ? 10 : Math.min(Math.max(1, countInput), 30);
+  const cards = generateCards(binInput, count);
+
+  if (!cards || cards.length === 0) {
+    await sendMessage(chatId, `${EMOJI.CROSS} <b>Error:</b> No se pudieron generar tarjetas con el BIN proporcionado.`);
+    return;
+  }
+
+  await sendMessage(chatId, renderCardGeneratorMessage(cards, binInput, count));
+}
+
+export async function handleChkCommand(msg) {
+  const chatId = String(msg.chat.id);
+  const parts = msg.text.trim().split(/\s+/);
+
+  if (parts.length < 2) {
+    await sendMessage(chatId,
+      `${EMOJI.INFO} <b>CODEX® CHECKER — SINTAXIS DE USO</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `Sintaxis: <code>/chk [URL]</code>\n\n` +
+      `Ejemplo:\n` +
+      `• <code>/chk https://ejemplo.com/checkout</code>`
+    );
+    return;
+  }
+
+  const targetUrl = parts[1].startsWith('http') ? parts[1] : `https://${parts[1]}`;
+
+  await sendMessage(chatId, `${EMOJI.SCANNER} <b>Escaneando pasarelas en URL...</b>\n<code>${targetUrl}</code>`);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(targetUrl, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36' }
+    });
+    clearTimeout(timeoutId);
+
+    const html = (await resp.text()).toLowerCase();
+
+    let provider = 'generic';
+    if (html.includes('stripe.com') || html.includes('stripe-elements') || html.includes('__stripe')) provider = 'stripe';
+    else if (html.includes('braintree') || html.includes('braintreegateway')) provider = 'braintree';
+    else if (html.includes('adyen')) provider = 'adyen';
+    else if (html.includes('paypal') || html.includes('paypalobjects')) provider = 'paypal';
+    else if (html.includes('shopify')) provider = 'shopify (stripe)';
+    else if (html.includes('square')) provider = 'square';
+    else if (html.includes('recurly')) provider = 'recurly';
+
+    const hasCheckout = /checkout|payment|billing|card-number|pay-button|subscribe/i.test(html) || provider !== 'generic';
+    const has3DS = html.includes('3ds') || html.includes('cardinal') || html.includes('three-d-secure') || html.includes('stripe-3ds');
+    const hasCaptcha = html.includes('hcaptcha') || html.includes('recaptcha') || html.includes('cf-turnstile');
+    const fieldsCount = (html.match(/<input/g) || []).length;
+
+    await sendMessage(chatId, renderCheckerMessage(targetUrl, { provider, hasCheckout, has3DS, hasCaptcha, fieldsCount }));
+  } catch (err) {
+    await sendMessage(chatId,
+      `${EMOJI.CROSS} <b>Error al inspeccionar la URL:</b>\n` +
+      `<code>${(err.message || 'No se pudo conectar con el sitio web.').slice(0, 200)}</code>`
+    );
+  }
+}
+
+export async function handleBroadcastCommand(msg) {
+  const chatId = String(msg.chat.id);
+  const from = msg.from || {};
+  const userId = String(from.id || msg.chat.id);
+
+  if (!isOwner(userId)) {
+    await sendMessage(chatId, `${EMOJI.CROSS} <b>Acceso denegado.</b> Este comando es exclusivo del Administrador.`);
+    return;
+  }
+
+  const broadcastText = msg.text.replace(/^\/broadcast\s*/i, '').trim();
+  if (!broadcastText) {
+    await sendMessage(chatId, `${EMOJI.INFO} Uso: <code>/broadcast [Mensaje con formato HTML]</code>`);
+    return;
+  }
+
+  const senderName = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Admin';
+  const users = loadUsersDb();
+
+  await sendMessage(chatId, `${EMOJI.BROADCAST} <b>Iniciando envío masivo a ${users.length} usuarios...</b>`);
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const u of users) {
+    if (u.telegramId && !u.telegramId.startsWith('-')) {
+      try {
+        const res = await sendMessage(u.telegramId, renderBroadcastMessage(broadcastText, senderName));
+        if (res && res.ok) successCount++;
+        else failCount++;
+      } catch {
+        failCount++;
+      }
+    }
+  }
+
+  await sendMessage(chatId,
+    `${EMOJI.CHECK} <b>PROCESO DE TRANSMISIÓN FINALIZADO</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `• Enviados con éxito: <code>${successCount}</code>\n` +
+    `• Fallidos/Bloqueados: <code>${failCount}</code>\n` +
+    `• Total destinatarios: <code>${users.length}</code>`
+  );
 }

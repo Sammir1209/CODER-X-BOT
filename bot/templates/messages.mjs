@@ -250,12 +250,73 @@ export function renderRegisterMessage(user, userId, isNewRegistration = true) {
   );
 }
 
+export function renderCardGeneratorMessage(cards, bin, count) {
+  const brand = cards[0]?.brand || 'CARD';
+  const cardList = cards.map(c => `<code>${c.formatted}</code>`).join('\n');
+
+  return (
+    `${header('CODEX® GENERATOR', `BIN ${bin} • ${brand}`)}\n` +
+    `\n` +
+    `${EMOJI.CREDIT_CARD} <b>Generador de Tarjetas Luhn Válidas</b>\n` +
+    `${DECO.BULLET} <i>Algoritmo: Luhn Standard Modulo 10</i>\n` +
+    `${DECO.BULLET} <i>Cantidad: <code>${cards.length}</code> tarjetas generadas</i>\n` +
+    `${section(EMOJI.TARGET, 'Resultados Creados')}` +
+    `${cardList}\n` +
+    `\n${DECO.LINE_THIN}\n` +
+    `\n` +
+    `${EMOJI.BULB} <b>Instrucciones de Uso</b> ${DECO.ARROW_FANCY}\n` +
+    `${DECO.BULLET} <i>Haz 1-tap sobre cualquier tarjeta para copiarla.</i>\n` +
+    `${DECO.BULLET} <i>Formato: <code>CC|MM|YYYY|CVV</code></i>\n` +
+    `\n${footer(`${EMOJI.LOCK} CODEX® Generator • 100% Luhn Verified`)}`
+  );
+}
+
+export function renderCheckerMessage(url, data) {
+  const isStripe = data.provider === 'stripe';
+  const providerIcon = isStripe ? EMOJI.LIGHTNING : EMOJI.GLOBE;
+  const statusIcon = data.hasCheckout ? EMOJI.CHECK : EMOJI.CROSS;
+
+  return (
+    `${header('CODEX® CHECKER', 'Escáner de Pasarelas & Security')}\n` +
+    `\n` +
+    `${EMOJI.SCANNER} <b>Análisis de Pasarela de Pago</b>\n` +
+    `${DECO.BULLET} <b>URL:</b> <code>${url.slice(0, 50)}${url.length > 50 ? '...' : ''}</code>\n` +
+    `${section(EMOJI.CHART, 'Resultados del Diagnóstico')}` +
+    `${field('Pasarela Detectada', `${providerIcon} <b>${data.provider.toUpperCase()}</b>`)}\n` +
+    `${field('Checkout Activo', `${statusIcon} <b>${data.hasCheckout ? 'SÍ (Formulario Detectado)' : 'NO'}</b>`)}\n` +
+    `${field('Protección 3D Secure', data.has3DS ? `${EMOJI.WARNING} <b>ACTIVA (3DS 2.0 / EMVCo)</b>` : `${EMOJI.CHECK} <i>No requerida / Estándar</i>`)}\n` +
+    `${field('Captcha Guard', data.hasCaptcha ? `${EMOJI.LOCK} <b>hCaptcha / reCAPTCHA Detectado</b>` : `${EMOJI.CHECK} <i>Sin Captcha activo</i>`)}\n` +
+    `${field('Campos Detectados', `<code>${data.fieldsCount || 0} inputs`)}`\n` +
+    `\n${DECO.LINE_THIN}\n` +
+    `\n` +
+    `${EMOJI.SHIELD} <b>Recomendación CODEX®</b> ${DECO.ARROW_FANCY}\n` +
+    `${DECO.BULLET} <i>${isStripe ? 'Utiliza la extensión CODEX® con Anti-Radar activo para este sitio.' : 'Pasarela compatible con Auto-Fill CODEX®.'}</i>\n` +
+    `\n${footer(`${EMOJI.LOCK} CODEX® Security Scanner • Real-time Inspection`)}`
+  );
+}
+
+export function renderBroadcastMessage(content, senderName) {
+  return (
+    `${header('CODEX® ANUNCIO', 'Comunicado Oficial')}\n` +
+    `\n` +
+    `${EMOJI.BROADCAST} <b>Mensaje de la Administración CODEX®</b>\n` +
+    `${DECO.BULLET} <i>Enviado por: <b>${senderName}</b></i>\n` +
+    `\n${DECO.LINE_DOUBLE}\n` +
+    `\n` +
+    `${content}\n` +
+    `\n${DECO.LINE_DOUBLE}\n` +
+    `\n${footer(`${EMOJI.LOCK} CODEX® Broadcast System • Mensaje Oficial`)}`
+  );
+}
+
 export function renderHelpMessage(isOwnerUser) {
   let text =
     `${header('CODEX® AYUDA', 'Centro de Comandos')}\n` +
     `${section(EMOJI.INFO, 'Comandos Generales')}` +
     `${DECO.BULLET} <b>/start</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Registrar o iniciar sesión</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
-    `${DECO.BULLET} <b>/register</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Registrar usuario en la base de datos</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
+    `${DECO.BULLET} <b>/register</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Registrar en la base de datos</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
+    `${DECO.BULLET} <b>/gen [BIN] [cant]</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Generador de tarjetas Luhn</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
+    `${DECO.BULLET} <b>/chk [URL]</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Scanner de pasarelas de pago</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
     `${DECO.BULLET} <b>/me</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Perfil y ID de acceso</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
     `${DECO.BULLET} <b>/extension</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Descargar extensión .zip</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
     `${DECO.BULLET} <b>/status</b> — ${DECO.BRACKET_CORNER_LEFT} <i>Salud del servidor</i> ${DECO.BRACKET_CORNER_RIGHT}\n`;
@@ -264,12 +325,10 @@ export function renderHelpMessage(isOwnerUser) {
     text +=
       `\n${DECO.LINE_DOUBLE}\n` +
       `${section(EMOJI.CROWN, 'Comandos Admin')}` +
-      `${DECO.BULLET} <code>/vip [ID/@user] [días]</code>\n` +
-      `${DECO.BULLET} ${EMOJI.STAR} ${DECO.BRACKET_CORNER_LEFT} <i>Asignar días VIP</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
-      `${DECO.BULLET} <code>/removevip [ID/@user]</code>\n` +
-      `${DECO.BULLET} ${EMOJI.STAR} ${DECO.BRACKET_CORNER_LEFT} <i>Revocar plan VIP</i> ${DECO.BRACKET_CORNER_RIGHT}\n` +
-      `${DECO.BULLET} <code>/users</code>\n` +
-      `${DECO.BULLET} ${EMOJI.STAR} ${DECO.BRACKET_CORNER_LEFT} <i>Listar todos los usuarios</i> ${DECO.BRACKET_CORNER_RIGHT}\n`;
+      `${DECO.BULLET} <code>/vip [ID/@user] [días]</code> — <i>Asignar días VIP</i>\n` +
+      `${DECO.BULLET} <code>/removevip [ID/@user]</code> — <i>Revocar plan VIP</i>\n` +
+      `${DECO.BULLET} <code>/broadcast [mensaje]</code> — <i>Anuncio global a usuarios</i>\n` +
+      `${DECO.BULLET} <code>/users</code> — <i>Listar todos los usuarios</i>\n`;
   }
 
   text +=

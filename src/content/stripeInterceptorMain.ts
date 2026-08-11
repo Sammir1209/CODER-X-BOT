@@ -7,6 +7,30 @@ function initStealth() {
   if (desc) {
     Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => undefined, configurable: true });
   }
+
+  // ── Anti-Radar Telemetry Spoofing (m.stripe.com/6) ──
+  const generateGuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+
+  (window as any).__CODEX_TELEMETRY = {
+    muid: generateGuid(),
+    guid: generateGuid(),
+    sid: generateGuid(),
+  };
+
+  try {
+    const origSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function (key: string, val: string) {
+      if (key.includes('stripe') || key.includes('muid') || key.includes('guid')) {
+        return origSetItem(key, generateGuid());
+      }
+      return origSetItem(key, val);
+    };
+  } catch {}
+
   const getParam = (orig: Function) => {
     return function(this: any, param: number) {
       if (param === 0x9245) return 'Google Inc. (NVIDIA)';

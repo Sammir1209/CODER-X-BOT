@@ -34,4 +34,9 @@ export const EMOJI = {
   PROHIBITED: '<tg-emoji emoji-id="5240241223632954241">🚫</tg-emoji>',
   BULB:       '<tg-emoji emoji-id="5422439311196834318">💡</tg-emoji>',
   KEY:        '<tg-emoji emoji-id="5368324170671202286">🔑</tg-emoji>',
+  CREDIT_CARD:'<tg-emoji emoji-id="5431416174418041793">💳</tg-emoji>',
+  SCANNER:    '<tg-emoji emoji-id="5397779777941676882">🔍</tg-emoji>',
+  BROADCAST:  '<tg-emoji emoji-id="5422501061761887309">📢</tg-emoji>',
+  TARGET:     '<tg-emoji emoji-id="5357416390171036835">🎯</tg-emoji>',
+  KEYBOARD:   '<tg-emoji emoji-id="5282701761826535561">⌨️</tg-emoji>',
 };

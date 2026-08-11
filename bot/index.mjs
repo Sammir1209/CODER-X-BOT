@@ -3,7 +3,10 @@ import { apiCall } from './services/telegramApi.mjs';
 import { startHealthServer } from './services/healthServer.mjs';
 import { handleCallbackQuery } from './handlers/callbackHandlers.mjs';
 import {
+  handleBroadcastCommand,
+  handleChkCommand,
   handleExtension,
+  handleGenCommand,
   handleHelp,
   handleListUsersCommand,
   handleProfile,
@@ -36,6 +39,20 @@ export async function processUpdate(update) {
       case '/register':
       case '/registro':
         await handleRegister(msg);
+        break;
+      case '/gen':
+      case '/generate':
+      case '/cards':
+        await handleGenCommand(msg);
+        break;
+      case '/chk':
+      case '/check':
+      case '/scan':
+        await handleChkCommand(msg);
+        break;
+      case '/broadcast':
+      case '/anuncio':
+        await handleBroadcastCommand(msg);
         break;
       case '/me':
       case '/perfil':
