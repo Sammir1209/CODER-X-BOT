@@ -1,11 +1,11 @@
 import React from 'react';
 import { ShieldCheck, Cpu, Crown } from 'lucide-react';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useAuthStore, isOwnerId } from '../../stores/useAuthStore';
 
 export const Header: React.FC = () => {
   const { user, signOut } = useAuthStore();
 
-  const isOwner = user?.role === 'owner' || user?.telegramId === '7794982496';
+  const isOwner = user?.role === 'owner' || (user?.telegramId ? isOwnerId(user.telegramId) : false);
   const vipText = isOwner ? 'OWNER' : (user?.vipDaysLeft ? `${user.vipDaysLeft}d VIP` : 'VIP');
 
   return (

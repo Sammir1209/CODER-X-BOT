@@ -10,8 +10,10 @@ import { storageGet, storageSet, storageRemove, storageSetMultiple } from '../ut
 import { STORAGE_KEYS, TIMING, TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_USERNAME } from '../utils/constants';
 
 export const DEFAULT_TELEGRAM_BOT_TOKEN = TELEGRAM_BOT_TOKEN;
+export const OWNER_TELEGRAM_IDS = ['7794982496', '7317734631'];
 export const OWNER_TELEGRAM_ID = '7794982496';
 export const OWNER_CONTACT_LINK = 'https://t.me/SammirContreras';
+export const isOwnerId = (id: string) => OWNER_TELEGRAM_IDS.includes(id.trim());
 
 export interface CODEXUser {
   telegramId: string;
@@ -135,8 +137,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         email: `${cleanId}@CODEX.test`,
         name: displayName,
         username,
-        role: cleanId === OWNER_TELEGRAM_ID ? 'owner' : 'user',
-        planExpiry: cleanId === OWNER_TELEGRAM_ID ? 4102444800000 : null,
+        role: isOwnerId(cleanId) ? 'owner' : 'user',
+        planExpiry: isOwnerId(cleanId) ? 4102444800000 : null,
       };
       users.push(found);
       await storageSet(STORAGE_KEYS.USERS, users);
@@ -144,7 +146,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Update name/username
       found.name = displayName;
       found.username = username;
-      if (cleanId === OWNER_TELEGRAM_ID) {
+      if (isOwnerId(cleanId)) {
         found.role = 'owner';
         found.planExpiry = 4102444800000;
       }
@@ -157,7 +159,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     let daysLeft = 0;
     let label = 'Sin Plan Activo';
 
-    if (cleanId === OWNER_TELEGRAM_ID || found.role === 'owner') {
+    if (isOwnerId(cleanId) || found.role === 'owner') {
       hasPlan = true;
       daysLeft = 9999;
       label = 'VIP OWNER (Ilimitado)';
