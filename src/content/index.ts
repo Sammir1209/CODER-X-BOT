@@ -9,6 +9,7 @@
  */
 
 import { setupContentScriptMessaging } from './messaging';
+import { startCaptchaAutoClicker } from './captchaAutoClicker';
 import { CODEROverlay } from './overlay';
 import { detectCheckoutFields } from './detector';
 import { AutoTestRunner, type RunnerStats } from './autoTestRunner';
@@ -20,8 +21,9 @@ import type { TestCase } from '../types/testCase';
 
 console.log('[CODER] Content script initialized on:', window.location.hostname);
 
-// Set up messaging for all frames
+// Set up messaging & Captcha auto-clicker for all frames (top + iframes)
 setupContentScriptMessaging();
+startCaptchaAutoClicker();
 
 // Only run overlay & auto-test in the top window
 const isTopWindow = window === window.top;

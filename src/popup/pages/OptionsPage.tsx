@@ -11,6 +11,7 @@ export const OptionsPage: React.FC = () => {
   // Automation & AI states
   const [autofillEnabled, setAutofillEnabled] = useState(true);
   const [audioNotifications, setAudioNotifications] = useState(true);
+  const [suppressSaveCardPrompt, setSuppressSaveCardPrompt] = useState(true);
   const [aiHeuristicMode, setAiHeuristicMode] = useState(true);
   const [aiIframeTraversal, setAiIframeTraversal] = useState(true);
   const [aiCustomFormSolver, setAiCustomFormSolver] = useState(true);
@@ -37,6 +38,7 @@ export const OptionsPage: React.FC = () => {
     storageGetMultiple<Record<string, unknown>>([
       STORAGE_KEYS.AUTOFILL_ENABLED,
       STORAGE_KEYS.AUDIO_NOTIFICATIONS,
+      STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT,
       STORAGE_KEYS.AI_HEURISTIC_MODE,
       STORAGE_KEYS.AI_IFRAME_TRAVERSAL,
       STORAGE_KEYS.AI_CUSTOM_FORM_SOLVER,
@@ -46,6 +48,7 @@ export const OptionsPage: React.FC = () => {
     ]).then((res) => {
       if (res[STORAGE_KEYS.AUTOFILL_ENABLED] !== undefined) setAutofillEnabled(!!res[STORAGE_KEYS.AUTOFILL_ENABLED]);
       if (res[STORAGE_KEYS.AUDIO_NOTIFICATIONS] !== undefined) setAudioNotifications(!!res[STORAGE_KEYS.AUDIO_NOTIFICATIONS]);
+      if (res[STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT] !== undefined) setSuppressSaveCardPrompt(!!res[STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT]);
       if (res[STORAGE_KEYS.AI_HEURISTIC_MODE] !== undefined) setAiHeuristicMode(!!res[STORAGE_KEYS.AI_HEURISTIC_MODE]);
       if (res[STORAGE_KEYS.AI_IFRAME_TRAVERSAL] !== undefined) setAiIframeTraversal(!!res[STORAGE_KEYS.AI_IFRAME_TRAVERSAL]);
       if (res[STORAGE_KEYS.AI_CUSTOM_FORM_SOLVER] !== undefined) setAiCustomFormSolver(!!res[STORAGE_KEYS.AI_CUSTOM_FORM_SOLVER]);
@@ -275,6 +278,19 @@ export const OptionsPage: React.FC = () => {
                 type="checkbox"
                 checked={audioNotifications}
                 onChange={(e) => handleToggle(setAudioNotifications, STORAGE_KEYS.AUDIO_NOTIFICATIONS, e.target.checked)}
+                className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
+              />
+            </label>
+
+            <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
+              <div>
+                <span className="font-extrabold text-slate-200 block">Bloquear aviso "¿Quieres guardar la tarjeta?"</span>
+                <span className="text-[10px] text-slate-500 font-medium">Bloquear la ventana emergente nativa de autofill de Brave / Chrome</span>
+              </div>
+              <input
+                type="checkbox"
+                checked={suppressSaveCardPrompt}
+                onChange={(e) => handleToggle(setSuppressSaveCardPrompt, STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT, e.target.checked)}
                 className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
               />
             </label>

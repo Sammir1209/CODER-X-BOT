@@ -40,6 +40,7 @@ export const STORAGE_KEYS = {
   RANDOM_ADDRESSES: 'CODEX_random_addresses',
   AUTOFILL_ENABLED: 'CODEX_autofill_enabled',
   AUDIO_NOTIFICATIONS: 'CODEX_audio_notifications',
+  SUPPRESS_SAVE_CARD_PROMPT: 'CODEX_suppress_save_card_prompt',
 
   // AI Engine
   AI_HEURISTIC_MODE: 'CODEX_ai_heuristic_mode',

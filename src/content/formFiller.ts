@@ -132,6 +132,13 @@ function setNativeInputValue(
 
   const inputEl = el as HTMLInputElement;
 
+  // Suppress browser "Save card?" prompt (Brave/Chrome autofill popups)
+  try {
+    inputEl.setAttribute('autocomplete', 'off');
+    inputEl.setAttribute('data-bwignore', 'true');
+    inputEl.setAttribute('data-lpignore', 'true');
+  } catch {}
+
   // Ultra-fast value assignment via prototype setter & instant event dispatching
   const prototype = Object.getPrototypeOf(inputEl);
   const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value') ||

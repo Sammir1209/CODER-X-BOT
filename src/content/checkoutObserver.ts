@@ -145,22 +145,30 @@ export class CheckoutObserver {
       const src = (iframe.src || iframe.getAttribute('src') || '').toLowerCase();
       const name = (iframe.name || iframe.getAttribute('name') || '').toLowerCase();
 
-      // Ignore standard fingerprinting, payment elements, or 0/1px hidden frames
-      if (src.includes('m.stripe.network') || src.includes('b.stripecdn.com') || name.includes('__privateStripeFrame')) {
+      // Ignore standard fingerprinting, captchas (hCaptcha, reCAPTCHA, Turnstile), payment elements, or 0/1px hidden frames
+      const isCaptchaIframe = (
+        src.includes('hcaptcha') || src.includes('recaptcha') ||
+        src.includes('turnstile') || src.includes('captcha') ||
+        src.includes('geetest') || src.includes('funcaptcha') ||
+        name.includes('hcaptcha') || name.includes('recaptcha')
+      );
+
+      if (isCaptchaIframe || src.includes('m.stripe.network') || src.includes('b.stripecdn.com') || name.includes('__privateStripeFrame')) {
         continue;
       }
 
       const is3DSUrl = (
-        src.includes('three-ds') || src.includes('3ds') ||
-        src.includes('challenge') || src.includes('authenticate') ||
+        src.includes('three-ds') || src.includes('3d-secure') || src.includes('3ds') ||
         src.includes('arcot.com') || src.includes('acs.') ||
-        src.includes('secure2.') || src.includes('bankofamerica') ||
-        src.includes('visa.com/pay') || src.includes('mastercard')
+        src.includes('cardinalcommerce') || src.includes('verifiedbyvisa') ||
+        src.includes('mcsecurecode') || src.includes('secure2.') ||
+        src.includes('bankofamerica') || src.includes('visa.com/pay') ||
+        src.includes('mastercard')
       );
       
       if (is3DSUrl) {
         const rect = iframe.getBoundingClientRect();
-        // 3DS Challenge dialogs are substantial modals (> 250px width and height)
+        // Genuine 3DS Challenge dialogs are substantial bank modals (> 250px width and height)
         if (rect.width > 250 && rect.height > 200) {
           return 'REQUIRES_ACTION';
         }
