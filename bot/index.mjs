@@ -18,120 +18,167 @@ import {
 } from './handlers/commandHandlers.mjs';
 import { getOrRegisterUser } from './database/userStore.mjs';
 
+// ─── Command Router ──────────────────────────────────────────────────────────
+const COMMAND_MAP = {
+  '/start':     handleStart,
+  '/register':  handleRegister,
+  '/registro':  handleRegister,
+  '/gen':       handleGenCommand,
+  '/generate':  handleGenCommand,
+  '/cards':     handleGenCommand,
+  '/chk':       handleChkCommand,
+  '/check':     handleChkCommand,
+  '/scan':      handleChkCommand,
+  '/broadcast': handleBroadcastCommand,
+  '/anuncio':   handleBroadcastCommand,
+  '/me':        handleProfile,
+  '/perfil':    handleProfile,
+  '/vip':       handleVipCommand,
+  '/removevip': handleRemoveVipCommand,
+  '/users':     handleListUsersCommand,
+  '/usuarios':  handleListUsersCommand,
+  '/status':    handleStatus,
+  '/estado':    handleStatus,
+  '/extension': handleExtension,
+  '/zip':       handleExtension,
+  '/help':      handleHelp,
+  '/ayuda':     handleHelp,
+};
+
+// ─── Update Processor ────────────────────────────────────────────────────────
 export async function processUpdate(update) {
-  if (update.message && update.message.text) {
-    const msg = update.message;
-    const text = msg.text.trim();
-    const chatId = String(msg.chat.id);
-    const from = msg.from || {};
-    const userId = String(from.id || msg.chat.id);
-    const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
-    const username = from.username ? `@${from.username}` : '';
+  try {
+    if (update.message && update.message.text) {
+      const msg = update.message;
+      const text = msg.text.trim();
+      const from = msg.from || {};
+      const userId = String(from.id || msg.chat.id);
+      const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
+      const username = from.username ? `@${from.username}` : '';
 
-    getOrRegisterUser(userId, { name, username });
+      // Register/update user silently — never let this crash the handler
+      try {
+        getOrRegisterUser(userId, { name, username });
+      } catch (regErr) {
+        console.error('[BOT] Error registering user:', regErr.message);
+      }
 
-    const cmd = text.split(/\s+/)[0].toLowerCase().replace(/@.*$/, '');
+      const cmd = text.split(/\s+/)[0].toLowerCase().replace(/@.*$/, '');
+      const handler = COMMAND_MAP[cmd];
 
-    switch (cmd) {
-      case '/start':
-        await handleStart(msg);
-        break;
-      case '/register':
-      case '/registro':
-        await handleRegister(msg);
-        break;
-      case '/gen':
-      case '/generate':
-      case '/cards':
-        await handleGenCommand(msg);
-        break;
-      case '/chk':
-      case '/check':
-      case '/scan':
-        await handleChkCommand(msg);
-        break;
-      case '/broadcast':
-      case '/anuncio':
-        await handleBroadcastCommand(msg);
-        break;
-      case '/me':
-      case '/perfil':
-        await handleProfile(msg);
-        break;
-      case '/vip':
-        await handleVipCommand(msg);
-        break;
-      case '/removevip':
-        await handleRemoveVipCommand(msg);
-        break;
-      case '/users':
-      case '/usuarios':
-        await handleListUsersCommand(msg);
-        break;
-      case '/status':
-      case '/estado':
-        await handleStatus(msg);
-        break;
-      case '/extension':
-      case '/zip':
-        await handleExtension(msg);
-        break;
-      case '/help':
-      case '/ayuda':
-        await handleHelp(msg);
-        break;
-      default:
-        break;
+      if (handler) {
+        try {
+          await handler(msg);
+        } catch (cmdErr) {
+          console.error(`[BOT] Error in handler for ${cmd}:`, cmdErr.message);
+        }
+      }
+    } else if (update.callback_query) {
+      try {
+        await handleCallbackQuery(update.callback_query);
+      } catch (cbErr) {
+        console.error('[BOT] Error in callback handler:', cbErr.message);
+      }
     }
-  } else if (update.callback_query) {
-    await handleCallbackQuery(update.callback_query);
+  } catch (fatalErr) {
+    console.error('[BOT] Fatal error processing update:', fatalErr.message);
   }
 }
 
+// ─── Polling Engine with Backoff ─────────────────────────────────────────────
 let offset = 0;
+let consecutiveErrors = 0;
+const BASE_DELAY = 1000;
+const MAX_DELAY = 30000;
 
 export async function pollUpdates() {
   try {
     const res = await apiCall('getUpdates', {
       offset,
-      timeout: 20,
+      timeout: 25,
       allowed_updates: ['message', 'callback_query'],
     });
 
     if (res.ok && Array.isArray(res.result)) {
+      consecutiveErrors = 0; // Reset on success
       for (const update of res.result) {
         offset = update.update_id + 1;
         await processUpdate(update);
       }
     } else if (res.error_code === 409) {
-      console.warn('[BOT] Conflicto 409 detectado. Asegúrate de cerrar otras instancias del bot.');
+      console.warn('[BOT] Conflicto 409 — otra instancia activa. Reintentando deleteWebhook...');
+      try {
+        await apiCall('deleteWebhook', { drop_pending_updates: true });
+      } catch {}
+      consecutiveErrors++;
+    } else if (res.error_code === 429) {
+      // Rate limited by Telegram
+      const retryAfter = (res.parameters?.retry_after || 5) * 1000;
+      console.warn(`[BOT] Rate limited. Esperando ${retryAfter / 1000}s...`);
+      await sleep(retryAfter);
+      consecutiveErrors = 0;
+    } else {
+      console.warn('[BOT] Unexpected getUpdates response:', JSON.stringify(res).slice(0, 200));
+      consecutiveErrors++;
     }
   } catch (err) {
-    console.error('[BOT] Polling error:', err.message);
+    console.error('[BOT] Polling network error:', err.message);
+    consecutiveErrors++;
   }
 
-  setTimeout(pollUpdates, 1500);
+  // Exponential backoff: 1s → 2s → 4s → 8s → ... → 30s max
+  const delay = Math.min(BASE_DELAY * Math.pow(2, consecutiveErrors), MAX_DELAY);
+  setTimeout(pollUpdates, delay);
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ─── Bot Startup ─────────────────────────────────────────────────────────────
 export async function startBot() {
-  console.log('\n🚀 CODEX(R) Bot & VIP Manager iniciado (Arquitectura Modular)');
+  console.log('\n🚀 CODEX® Bot & VIP Manager iniciado (Arquitectura Modular)');
   console.log(`   Bot: @CodexrOutBot`);
   console.log(`   Owner IDs: ${OWNER_IDS.join(', ')}`);
-  console.log(`   Comandos Admin: /vip  /removevip  /users`);
-  console.log(`   Comandos Usuario: /start  /me  /extension  /status\n`);
+  console.log(`   Comandos Admin: /vip  /removevip  /users  /broadcast`);
+  console.log(`   Comandos Usuario: /start  /register  /me  /gen  /chk  /extension  /status  /help\n`);
 
   startHealthServer();
 
+  // Force clean webhook state before starting long-polling
   try {
     await apiCall('deleteWebhook', { drop_pending_updates: false });
-  } catch {}
+    console.log('[BOT] Webhook eliminado correctamente. Iniciando long-polling...');
+  } catch (err) {
+    console.warn('[BOT] No se pudo eliminar webhook:', err.message);
+  }
+
+  // Small delay to let any previous instance release the getUpdates lock
+  await sleep(2000);
 
   pollUpdates();
 }
 
-// Auto start bot if directly invoked
-if (process.argv[1] && process.argv[1].endsWith('index.mjs')) {
-  startBot();
-} else {
-  startBot();
-}
+// ─── Graceful Shutdown ───────────────────────────────────────────────────────
+process.on('SIGTERM', () => {
+  console.log('[BOT] SIGTERM recibido. Cerrando bot...');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('[BOT] SIGINT recibido. Cerrando bot...');
+  process.exit(0);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[BOT] Excepción no capturada:', err.message);
+  // Don't exit — keep running
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[BOT] Promesa rechazada sin manejar:', reason);
+  // Don't exit — keep running
+});
+
+// Auto-start
+startBot();

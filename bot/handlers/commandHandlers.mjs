@@ -315,7 +315,7 @@ export async function handleExtension(msg) {
   } catch (err) {
     console.error('[BOT] Error en /extension:', err);
     await sendMessage(chatId,
-      `${EMOJI.CROSS} <b>Error al procesar la extensión:</b>\n<code>${(err.message || String(err)).slice(0, 300)}</code>`
+      `${EMOJI.CROSS} <b>Error al procesar la extensión:</b>\n<code>${escapeHtml((err.message || String(err)).slice(0, 300))}</code>`
     );
   }
 }
@@ -429,9 +429,10 @@ export async function handleChkCommand(msg) {
 
     await sendMessage(chatId, renderCheckerMessage(targetUrl, { provider, hasCheckout, has3DS, hasCaptcha, fieldsCount }));
   } catch (err) {
-    const errorDetails = err.cause?.message || err.message || String(err);
+    const errorDetails = escapeHtml(err.cause?.message || err.message || String(err));
+    const isTimeout = err.name === 'AbortError' || errorDetails.includes('abort');
     await sendMessage(chatId,
-      `${EMOJI.CROSS} <b>Error al inspeccionar la URL:</b>\n` +
+      `${EMOJI.CROSS} <b>${isTimeout ? 'Timeout — La URL no respondió a tiempo (12s)' : 'Error al inspeccionar la URL'}:</b>\n` +
       `<code>${errorDetails.slice(0, 200)}</code>`
     );
   }
@@ -470,6 +471,8 @@ export async function handleBroadcastCommand(msg) {
       } catch {
         failCount++;
       }
+      // Anti-rate-limit: 50ms delay between sends
+      await new Promise(r => setTimeout(r, 50));
     }
   }
 
