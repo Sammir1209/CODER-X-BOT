@@ -1,12 +1,14 @@
 /**
  * CODEX(R) System — Floating Toast Notification System
  *
- * Displays high-visibility, sleek floating toasts in the top-right corner of the page.
- * Shows card testing details (full card info), DECLINED results, HITS, and 3DS alerts.
+ * Displays high-visibility, ultra-sleek floating toasts in the top-right corner.
+ * Features an intelligent queue manager that automatically prevents toast stacking/overlapping
+ * by limiting active notifications and instantly transitioning previous card status updates.
  */
 
 export class ToastNotification {
   private static container: HTMLDivElement | null = null;
+  private static activeToasts: HTMLElement[] = [];
 
   private static ensureContainer(): HTMLDivElement {
     if (this.container && document.body.contains(this.container)) {
@@ -16,11 +18,11 @@ export class ToastNotification {
     const host = document.createElement('div');
     host.id = 'CODEX-toast-host';
     host.style.position = 'fixed';
-    host.style.top = '16px';
-    host.style.right = '16px';
+    host.style.top = '20px';
+    host.style.right = '20px';
     host.style.zIndex = '2147483647';
     host.style.pointerEvents = 'none';
-    host.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    host.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     const shadow = host.attachShadow({ mode: 'open' });
 
@@ -29,74 +31,84 @@ export class ToastNotification {
       .toast-wrapper {
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        max-width: 380px;
+        gap: 8px;
+        max-width: 360px;
+        align-items: flex-end;
       }
       .toast-card {
         pointer-events: auto;
-        background: rgba(11, 13, 20, 0.95);
+        width: 340px;
+        background: rgba(5, 7, 12, 0.96);
         backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 12px;
-        padding: 12px 16px;
-        color: #f8fafc;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-        animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 12px 14px;
+        color: #ffffff;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), 0 0 1px rgba(255, 255, 255, 0.15);
+        animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 12px;
         font-size: 12px;
+        transition: all 0.2s ease;
       }
       .toast-card.declined {
-        border-color: rgba(248, 113, 113, 0.4);
-        background: rgba(24, 11, 15, 0.95);
+        border-left: 4px solid #f43f5e;
+        background: rgba(18, 6, 10, 0.96);
       }
       .toast-card.success {
-        border-color: rgba(52, 211, 153, 0.6);
-        background: rgba(10, 26, 20, 0.95);
-        box-shadow: 0 0 30px rgba(52, 211, 153, 0.3);
+        border-left: 4px solid #10b981;
+        background: rgba(6, 20, 14, 0.96);
+        box-shadow: 0 0 35px rgba(16, 185, 129, 0.35);
       }
       .toast-card.threeds {
-        border-color: rgba(251, 191, 36, 0.5);
-        background: rgba(26, 22, 10, 0.95);
+        border-left: 4px solid #f59e0b;
+        background: rgba(22, 16, 6, 0.96);
       }
       .toast-card.info {
-        border-color: rgba(99, 102, 241, 0.4);
-        background: rgba(14, 16, 30, 0.95);
+        border-left: 4px solid #6366f1;
+        background: rgba(10, 12, 24, 0.96);
       }
       .toast-icon {
-        font-size: 18px;
+        font-size: 20px;
         line-height: 1;
-        margin-top: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        flex-shrink: 0;
       }
       .toast-content {
         flex: 1;
+        min-width: 0;
       }
       .toast-title {
         font-weight: 900;
-        font-size: 11px;
-        letter-spacing: 0.8px;
+        font-size: 10px;
+        letter-spacing: 0.9px;
         text-transform: uppercase;
         margin-bottom: 2px;
+        line-height: 1.2;
       }
       .toast-desc {
         font-family: 'JetBrains Mono', Consolas, monospace;
         font-size: 11px;
-        color: #cbd5e1;
-        word-break: break-all;
+        color: #e2e8f0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
       }
-      .toast-meta {
-        font-size: 10px;
-        color: #94a3b8;
-        margin-top: 3px;
+      @keyframes toastSlideIn {
+        from { opacity: 0; transform: translateX(30px) scale(0.95); }
+        to { opacity: 1; transform: translateX(0) scale(1); }
       }
-      @keyframes toastIn {
-        from { opacity: 0; transform: translateY(-12px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-      }
-      @keyframes toastOut {
-        from { opacity: 1; transform: translateY(0) scale(1); }
-        to { opacity: 0; transform: translateY(-12px) scale(0.95); }
+      @keyframes toastSlideOut {
+        from { opacity: 1; transform: translateX(0) scale(1); }
+        to { opacity: 0; transform: translateX(30px) scale(0.92); }
       }
     `;
 
@@ -112,7 +124,24 @@ export class ToastNotification {
   }
 
   /**
-   * Shows a toast notification on page.
+   * Dismisses previous info/declined toasts to prevent stacking/crossing on screen.
+   */
+  private static pruneToasts(): void {
+    while (this.activeToasts.length >= 2) {
+      const oldest = this.activeToasts.shift();
+      if (oldest && oldest.parentNode) {
+        oldest.style.animation = 'toastSlideOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        setTimeout(() => {
+          if (oldest.parentNode) {
+            oldest.parentNode.removeChild(oldest);
+          }
+        }, 200);
+      }
+    }
+  }
+
+  /**
+   * Shows a clean floating toast notification.
    */
   public static show(options: {
     title: string;
@@ -127,6 +156,11 @@ export class ToastNotification {
       const type = options.type || 'info';
       const icon = options.icon || (type === 'success' ? '🎉' : type === 'declined' ? '❌' : type === 'threeds' ? '⚠️' : '💳');
 
+      // Prune previous toasts if type is info or declined to avoid overlap
+      if (type === 'info' || type === 'declined') {
+        this.pruneToasts();
+      }
+
       const card = document.createElement('div');
       card.className = `toast-card ${type}`;
 
@@ -139,7 +173,7 @@ export class ToastNotification {
 
       const titleEl = document.createElement('div');
       titleEl.className = 'toast-title';
-      titleEl.style.color = type === 'success' ? '#34d399' : type === 'declined' ? '#f87171' : type === 'threeds' ? '#fbbf24' : '#818cf8';
+      titleEl.style.color = type === 'success' ? '#4ade80' : type === 'declined' ? '#f87171' : type === 'threeds' ? '#fbbf24' : '#818cf8';
       titleEl.textContent = options.title;
 
       const descEl = document.createElement('div');
@@ -153,16 +187,19 @@ export class ToastNotification {
       card.appendChild(contentEl);
 
       container.appendChild(card);
+      this.activeToasts.push(card);
 
-      const duration = options.durationMs || (type === 'success' ? 8000 : 4500);
+      const duration = options.durationMs || (type === 'success' ? 6000 : 2500);
 
       setTimeout(() => {
-        card.style.animation = 'toastOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        card.style.animation = 'toastSlideOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards';
         setTimeout(() => {
+          const idx = this.activeToasts.indexOf(card);
+          if (idx !== -1) this.activeToasts.splice(idx, 1);
           if (card.parentNode) {
             card.parentNode.removeChild(card);
           }
-        }, 300);
+        }, 200);
       }, duration);
     } catch (e) {
       console.warn('[CODEX(R)] Error showing toast:', e);
@@ -173,15 +210,16 @@ export class ToastNotification {
    * Toast when testing a specific card with full info
    */
   public static showCardTesting(card: { number: string; expiryMonth?: string; expMonth?: string; expiryYear?: string; expYear?: string; cvc: string }, index: number, total: number): void {
-    const formattedNum = card.number.replace(/(\d{4})/g, '$1 ').trim();
+    const cleanNum = card.number.replace(/\D/g, '');
+    const masked = cleanNum.length >= 8 ? `${cleanNum.slice(0, 4)} •••• •••• ${cleanNum.slice(-4)}` : cleanNum;
     const month = card.expiryMonth || card.expMonth || '12';
     const year = (card.expiryYear || card.expYear || '28').slice(-2);
     this.show({
       title: `PROBANDO CC #${index + 1} DE ${total}`,
-      description: `${formattedNum} | Exp: ${month}/${year} | CVV: ${card.cvc}`,
+      description: `${masked} | ${month}/${year} | CVV ${card.cvc}`,
       type: 'info',
       icon: '💳',
-      durationMs: 4000,
+      durationMs: 2000,
     });
   }
 
@@ -191,10 +229,10 @@ export class ToastNotification {
   public static showDeclined(maskedCard: string, index: number, reason?: string): void {
     this.show({
       title: `❌ TARJETA RECHAZADA #${index + 1}`,
-      description: `${maskedCard} — ${reason || 'Card Declined / Error en pago'}`,
+      description: `${maskedCard} — ${reason || 'Declinada / Error'}`,
       type: 'declined',
       icon: '❌',
-      durationMs: 4500,
+      durationMs: 2200,
     });
   }
 
@@ -204,10 +242,10 @@ export class ToastNotification {
   public static showHit(maskedCard: string, index: number): void {
     this.show({
       title: `🎉 ¡HIT APROBADO EN TARJETA #${index + 1}!`,
-      description: `${maskedCard} — Pago procesado exitosamente con éxito!`,
+      description: `${maskedCard} — ¡Pago procesado exitosamente!`,
       type: 'success',
       icon: '🎉',
-      durationMs: 10000,
+      durationMs: 8000,
     });
   }
 
@@ -217,10 +255,10 @@ export class ToastNotification {
   public static show3DS(maskedCard: string, index: number): void {
     this.show({
       title: `⚠️ ACCIÓN 3DS REQUERIDA #${index + 1}`,
-      description: `${maskedCard} — El banco solicitó verificación 3D-Secure.`,
+      description: `${maskedCard} — Desafío 3D-Secure detectado.`,
       type: 'threeds',
       icon: '⚠️',
-      durationMs: 6000,
+      durationMs: 5000,
     });
   }
 }
