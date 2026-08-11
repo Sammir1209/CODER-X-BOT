@@ -365,9 +365,15 @@ export async function handleGenCommand(msg) {
 
 export async function handleChkCommand(msg) {
   const chatId = String(msg.chat.id);
-  const parts = msg.text.trim().split(/\s+/);
+  const text = msg.text.trim();
 
-  if (parts.length < 2) {
+  // Extract URL from command text (handles /chk https://... or /chk@bot https://... or /chk domain.com)
+  const urlMatch = text.match(/(https?:\/\/[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/i);
+  const matchedPart = urlMatch ? urlMatch[0] : '';
+  // Ensure we didn't just match '/chk'
+  const isCmdOnly = matchedPart.toLowerCase().startsWith('/chk') || matchedPart.toLowerCase().startsWith('/check') || matchedPart.toLowerCase().startsWith('/scan');
+
+  if (!urlMatch || isCmdOnly) {
     await sendMessage(chatId,
       `${EMOJI.INFO} <b>CODEX® CHECKER — SINTAXIS DE USO</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
@@ -378,40 +384,51 @@ export async function handleChkCommand(msg) {
     return;
   }
 
-  const targetUrl = parts[1].startsWith('http') ? parts[1] : `https://${parts[1]}`;
+  let targetUrl = matchedPart.replace(/[>\]\)\'\"]+$/, '');
+  if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+    targetUrl = `https://${targetUrl}`;
+  }
 
   await sendMessage(chatId, `${EMOJI.SCANNER} <b>Escaneando pasarelas en URL...</b>\n<code>${targetUrl}</code>`);
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     const resp = await fetch(targetUrl, {
       signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36' }
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+      }
     });
     clearTimeout(timeoutId);
 
     const html = (await resp.text()).toLowerCase();
 
     let provider = 'generic';
-    if (html.includes('stripe.com') || html.includes('stripe-elements') || html.includes('__stripe')) provider = 'stripe';
+    if (html.includes('stripe.com') || html.includes('stripe-elements') || html.includes('__stripe') || html.includes('js.stripe.com')) provider = 'stripe';
     else if (html.includes('braintree') || html.includes('braintreegateway')) provider = 'braintree';
     else if (html.includes('adyen')) provider = 'adyen';
     else if (html.includes('paypal') || html.includes('paypalobjects')) provider = 'paypal';
     else if (html.includes('shopify')) provider = 'shopify (stripe)';
-    else if (html.includes('square')) provider = 'square';
+    else if (html.includes('square') || html.includes('squareup')) provider = 'square';
     else if (html.includes('recurly')) provider = 'recurly';
+    else if (html.includes('authorizenet') || html.includes('authorize.net')) provider = 'authorize.net';
 
-    const hasCheckout = /checkout|payment|billing|card-number|pay-button|subscribe/i.test(html) || provider !== 'generic';
+    const hasCheckout = /checkout|payment|billing|card-number|pay-button|subscribe|order|buy/i.test(html) || provider !== 'generic';
     const has3DS = html.includes('3ds') || html.includes('cardinal') || html.includes('three-d-secure') || html.includes('stripe-3ds');
-    const hasCaptcha = html.includes('hcaptcha') || html.includes('recaptcha') || html.includes('cf-turnstile');
+    const hasCaptcha = html.includes('hcaptcha') || html.includes('recaptcha') || html.includes('cf-turnstile') || html.includes('g-recaptcha');
     const fieldsCount = (html.match(/<input/g) || []).length;
 
     await sendMessage(chatId, renderCheckerMessage(targetUrl, { provider, hasCheckout, has3DS, hasCaptcha, fieldsCount }));
   } catch (err) {
+    const errorDetails = err.cause?.message || err.message || String(err);
     await sendMessage(chatId,
       `${EMOJI.CROSS} <b>Error al inspeccionar la URL:</b>\n` +
-      `<code>${(err.message || 'No se pudo conectar con el sitio web.').slice(0, 200)}</code>`
+      `<code>${errorDetails.slice(0, 200)}</code>`
     );
   }
 }
