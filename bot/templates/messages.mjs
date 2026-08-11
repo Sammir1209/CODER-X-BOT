@@ -22,6 +22,13 @@ const DECO = {
 
 // ─── Funciones Helper ─────────────────────────────────────────────────────
 
+export function escapeHtml(str = '') {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 const header = (title, subtitle = '') => {
   let result = `${DECO.LINE_THICK}\n`;
   result += `${EMOJI.STAR} <b>${title}</b> ${EMOJI.STAR}\n`;
@@ -276,11 +283,13 @@ export function renderCheckerMessage(url, data) {
   const providerIcon = isStripe ? EMOJI.LIGHTNING : EMOJI.GLOBE;
   const statusIcon = data.hasCheckout ? EMOJI.CHECK : EMOJI.CROSS;
 
+  const safeUrl = escapeHtml(url.slice(0, 60) + (url.length > 60 ? '...' : ''));
+
   return (
     `${header('CODEX® CHECKER', 'Escáner de Pasarelas & Security')}\n` +
     `\n` +
     `${EMOJI.SCANNER} <b>Análisis de Pasarela de Pago</b>\n` +
-    `${DECO.BULLET} <b>URL:</b> <code>${url.slice(0, 50)}${url.length > 50 ? '...' : ''}</code>\n` +
+    `${DECO.BULLET} <b>URL:</b> <code>${safeUrl}</code>\n` +
     `${section(EMOJI.CHART, 'Resultados del Diagnóstico')}` +
     `${field('Pasarela Detectada', `${providerIcon} <b>${data.provider.toUpperCase()}</b>`)}\n` +
     `${field('Checkout Activo', `${statusIcon} <b>${data.hasCheckout ? 'SÍ (Formulario Detectado)' : 'NO'}</b>`)}\n` +

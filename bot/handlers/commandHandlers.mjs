@@ -4,6 +4,7 @@ import { DIST_DIR, ROOT_DIR, ZIP_PATH } from '../config/constants.mjs';
 import { EMOJI } from '../templates/emojis.mjs';
 import { getActivePlanKeyboard, getNoPlanKeyboard } from '../templates/keymaps.mjs';
 import {
+  escapeHtml,
   renderBroadcastMessage,
   renderCardGeneratorMessage,
   renderCheckerMessage,
@@ -392,7 +393,7 @@ export async function handleChkCommand(msg) {
     targetUrl = `https://${targetUrl}`;
   }
 
-  await sendMessage(chatId, `${EMOJI.SCANNER} <b>Escaneando pasarelas en URL...</b>\n<code>${targetUrl}</code>`);
+  await sendMessage(chatId, `${EMOJI.SCANNER} <b>Escaneando pasarelas en URL...</b>\n<code>${escapeHtml(targetUrl)}</code>`);
 
   try {
     const controller = new AbortController();
