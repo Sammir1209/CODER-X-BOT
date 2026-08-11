@@ -88,6 +88,16 @@ export function setupMessageRouter(): void {
           break;
         }
         sessionManager.handleResultDetected(result, durationMs || 0);
+
+        // Broadcast to tabs so top-frame AutoTestRunner receives result instantly (0ms lag)
+        const activeTabId = tabId || sender.tab?.id;
+        if (activeTabId && typeof chrome !== 'undefined' && chrome.tabs) {
+          chrome.tabs.sendMessage(activeTabId, {
+            action: 'PAYMENT_RESULT_BROADCAST',
+            payload: message.payload,
+          }).catch(() => {});
+        }
+
         sendResponse({ success: true });
         break;
       }
