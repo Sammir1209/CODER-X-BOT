@@ -14,7 +14,6 @@ export const OptionsPage: React.FC = () => {
   const [suppressSaveCardPrompt, setSuppressSaveCardPrompt] = useState(true);
   const [aiHeuristicMode, setAiHeuristicMode] = useState(true);
   const [aiIframeTraversal, setAiIframeTraversal] = useState(true);
-  const [aiCustomFormSolver, setAiCustomFormSolver] = useState(true);
   const [aiScanStatus, setAiScanStatus] = useState<string | null>(null);
 
   // Randomization states
@@ -41,7 +40,6 @@ export const OptionsPage: React.FC = () => {
       STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT,
       STORAGE_KEYS.AI_HEURISTIC_MODE,
       STORAGE_KEYS.AI_IFRAME_TRAVERSAL,
-      STORAGE_KEYS.AI_CUSTOM_FORM_SOLVER,
       STORAGE_KEYS.RANDOM_NAMES,
       STORAGE_KEYS.RANDOM_ADDRESSES,
       STORAGE_KEYS.IDENTITY,
@@ -51,7 +49,6 @@ export const OptionsPage: React.FC = () => {
       if (res[STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT] !== undefined) setSuppressSaveCardPrompt(!!res[STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT]);
       if (res[STORAGE_KEYS.AI_HEURISTIC_MODE] !== undefined) setAiHeuristicMode(!!res[STORAGE_KEYS.AI_HEURISTIC_MODE]);
       if (res[STORAGE_KEYS.AI_IFRAME_TRAVERSAL] !== undefined) setAiIframeTraversal(!!res[STORAGE_KEYS.AI_IFRAME_TRAVERSAL]);
-      if (res[STORAGE_KEYS.AI_CUSTOM_FORM_SOLVER] !== undefined) setAiCustomFormSolver(!!res[STORAGE_KEYS.AI_CUSTOM_FORM_SOLVER]);
       if (res[STORAGE_KEYS.RANDOM_NAMES] !== undefined) setRandomNames(!!res[STORAGE_KEYS.RANDOM_NAMES]);
       if (res[STORAGE_KEYS.RANDOM_ADDRESSES] !== undefined) setRandomAddresses(!!res[STORAGE_KEYS.RANDOM_ADDRESSES]);
 
@@ -151,15 +148,15 @@ export const OptionsPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Section 1: Advanced Engine Controls */}
+        {/* Section 1: Preference & Automation Controls */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
             <h3 className="text-xs font-black text-indigo-400 tracking-wider flex items-center gap-2 uppercase">
-              <Cpu className="w-4 h-4 text-indigo-400" /> OPTIMIZADOR DE CHECKOUT & ANTI-RADAR
+              <Cpu className="w-4 h-4 text-indigo-400" /> OPTIMIZACIONES & PREFERENCIAS DEL SISTEMA
             </h3>
             <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/40 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              ULTRA SPEED ACTIVE
+              CORE OPERATIVO
             </span>
           </div>
 
@@ -167,14 +164,27 @@ export const OptionsPage: React.FC = () => {
             <div className="bg-slate-950/80 p-4 rounded-xl border border-indigo-500/20 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" /> Estado de Inyección & Detección:
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" /> Motor IA & Auto-Envío:
                 </span>
-                <span className="text-[10px] font-bold text-emerald-400 font-mono">100% AUTOMÁTICO E INTEGRADO</span>
+                <span className="text-[10px] font-bold text-emerald-400 font-mono">100% INTEGRADO INTERNO</span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                El motor IA heurístico, el recorrido de iFrames (Stripe, Braintree, Adyen, Xsolla, FastSpring) y la resolución de formularios están totalmente integrados por defecto en segundo plano.
+                El auto-envío de formulario, la resolución heurística de iFrames (Stripe, Braintree, Adyen, Xsolla, FastSpring) y el soporte multi-pasarela operan automáticamente de forma interna.
               </p>
             </div>
+
+            <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
+              <div>
+                <span className="font-extrabold text-slate-200 block">Bloquear aviso "¿Quieres guardar la tarjeta?"</span>
+                <span className="text-[10px] text-slate-500 font-medium">Bloquear la ventana emergente nativa de guardar tarjeta en Brave / Chrome</span>
+              </div>
+              <input
+                type="checkbox"
+                checked={suppressSaveCardPrompt}
+                onChange={(e) => handleToggle(setSuppressSaveCardPrompt, STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT, e.target.checked)}
+                className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
+              />
+            </label>
 
             <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
               <div>
@@ -191,8 +201,8 @@ export const OptionsPage: React.FC = () => {
 
             <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
               <div>
-                <span className="font-extrabold text-slate-200 block">Ofuscación Telemetría Anti-Radar v2</span>
-                <span className="text-[10px] text-slate-500 font-medium">Spoof de hardware (CPUs, Memoria, AudioContext y Pantalla) para Stripe Radar</span>
+                <span className="font-extrabold text-slate-200 block">Ofuscación Anti-Radar v2 & Anti-Fingerprint</span>
+                <span className="text-[10px] text-slate-500 font-medium">Spoofing de hardware, AudioContext y pantalla para evitar detección de pasarelas</span>
               </div>
               <input
                 type="checkbox"
@@ -201,34 +211,6 @@ export const OptionsPage: React.FC = () => {
                 className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
               />
             </label>
-
-            <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
-              <div>
-                <span className="font-extrabold text-slate-200 block">Auto-Envío del Formulario (Instant Submit)</span>
-                <span className="text-[10px] text-slate-500 font-medium">Hacer clic en Pagar / Subscribe inmediatamente después de inyectar datos</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={aiCustomFormSolver}
-                onChange={(e) => handleToggle(setAiCustomFormSolver, STORAGE_KEYS.AI_CUSTOM_FORM_SOLVER, e.target.checked)}
-                className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
-              />
-            </label>
-
-            {/* Gateway Compatibility Matrix */}
-            <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Pasarelas Soportadas en Tiempo Real:
-              </span>
-              <div className="flex flex-wrap gap-1.5 font-mono text-[10px]">
-                <span className="px-2 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800/40">● Stripe</span>
-                <span className="px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/40">● Adyen</span>
-                <span className="px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800/40">● Braintree</span>
-                <span className="px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 border border-blue-800/40">● Xsolla</span>
-                <span className="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/40">● FastSpring</span>
-                <span className="px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/40">● WooCommerce</span>
-              </div>
-            </div>
 
             {aiScanStatus && (
               <div className="p-3 bg-indigo-950/60 border border-indigo-800/60 text-indigo-300 text-[11px] rounded-xl font-mono flex items-center gap-2">
@@ -242,7 +224,7 @@ export const OptionsPage: React.FC = () => {
               onClick={handleTriggerAiFormScan}
               className="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs py-3.5 rounded-xl shadow-lg transition-all uppercase tracking-wider flex items-center justify-center gap-2"
             >
-              <Zap className="w-4 h-4 text-amber-300 animate-bounce" /> ESCANEAR Y TESTEAR PAGO EN PESTAÑA ACTIVA
+              <Zap className="w-4 h-4 text-amber-300 animate-bounce" /> TESTEAR FORMULARIO EN PESTAÑA ACTIVA
             </button>
           </div>
         </div>
@@ -278,19 +260,6 @@ export const OptionsPage: React.FC = () => {
                 type="checkbox"
                 checked={audioNotifications}
                 onChange={(e) => handleToggle(setAudioNotifications, STORAGE_KEYS.AUDIO_NOTIFICATIONS, e.target.checked)}
-                className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
-              />
-            </label>
-
-            <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
-              <div>
-                <span className="font-extrabold text-slate-200 block">Bloquear aviso "¿Quieres guardar la tarjeta?"</span>
-                <span className="text-[10px] text-slate-500 font-medium">Bloquear la ventana emergente nativa de autofill de Brave / Chrome</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={suppressSaveCardPrompt}
-                onChange={(e) => handleToggle(setSuppressSaveCardPrompt, STORAGE_KEYS.SUPPRESS_SAVE_CARD_PROMPT, e.target.checked)}
                 className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
               />
             </label>
