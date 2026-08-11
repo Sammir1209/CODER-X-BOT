@@ -151,15 +151,15 @@ export const OptionsPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Section 1: AI Checkout Form Detection Engine */}
+        {/* Section 1: Advanced Engine Controls */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
             <h3 className="text-xs font-black text-indigo-400 tracking-wider flex items-center gap-2 uppercase">
-              <Cpu className="w-4 h-4 text-indigo-400" /> MOTOR IA RESOLVER & DETECCIÓN DE CHECKOUTS
+              <Cpu className="w-4 h-4 text-indigo-400" /> OPTIMIZADOR DE CHECKOUT & ANTI-RADAR
             </h3>
             <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/40 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              99.8% AI ACCURACY
+              ULTRA SPEED ACTIVE
             </span>
           </div>
 
@@ -167,32 +167,32 @@ export const OptionsPage: React.FC = () => {
             <div className="bg-slate-950/80 p-4 rounded-xl border border-indigo-500/20 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" /> Estado del Motor Neurónico:
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" /> Estado de Inyección & Detección:
                 </span>
-                <span className="text-[10px] font-bold text-indigo-400 font-mono">ACTIVO & MONITORIZANDO</span>
+                <span className="text-[10px] font-bold text-emerald-400 font-mono">100% AUTOMÁTICO E INTEGRADO</span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                El sistema de IA analiza la estructura visual, atributos HTML y coordenadas DOM para identificar tarjetas en Stripe, OnlyFans, Shopify, Adyen, Braintree, Square y formularios personalizados.
+                El motor IA heurístico, el recorrido de iFrames (Stripe, Braintree, Adyen, Xsolla, FastSpring) y la resolución de formularios están totalmente integrados por defecto en segundo plano.
               </p>
             </div>
 
             <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
               <div>
-                <span className="font-extrabold text-slate-200 block">Detección Heurística IA (Deep Neural DOM Analysis)</span>
-                <span className="text-[10px] text-slate-500 font-medium">Auto-resolver números de tarjeta, expiración y CVC si no tienen clases estándar</span>
+                <span className="font-extrabold text-slate-200 block">Auto-Click en Captchas ("Soy humano")</span>
+                <span className="text-[10px] text-slate-500 font-medium">Auto-seleccionar casilla hCaptcha, reCAPTCHA y Turnstile automáticamente</span>
               </div>
               <input
                 type="checkbox"
                 checked={aiHeuristicMode}
-                onChange={(e) => handleToggle(setAiHeuristicMode, STORAGE_KEYS.AI_HEURISTIC_MODE, e.target.checked)}
+                onChange={(e) => handleToggle(setAiHeuristicMode, STORAGE_KEYS.CAPTCHA_AUTOCLICK_ENABLED, e.target.checked)}
                 className="w-4.5 h-4.5 accent-indigo-600 rounded cursor-pointer"
               />
             </label>
 
             <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
               <div>
-                <span className="font-extrabold text-slate-200 block">Auto-Inyección en iFrames Protegidos</span>
-                <span className="text-[10px] text-slate-500 font-medium">Soporte automático para Stripe Elements, Braintree e iFrames anidados</span>
+                <span className="font-extrabold text-slate-200 block">Ofuscación Telemetría Anti-Radar v2</span>
+                <span className="text-[10px] text-slate-500 font-medium">Spoof de hardware (CPUs, Memoria, AudioContext y Pantalla) para Stripe Radar</span>
               </div>
               <input
                 type="checkbox"
@@ -204,8 +204,8 @@ export const OptionsPage: React.FC = () => {
 
             <label className="flex items-center justify-between p-3.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:border-slate-700 transition-all">
               <div>
-                <span className="font-extrabold text-slate-200 block">Resolución de Formularios Personalizados</span>
-                <span className="text-[10px] text-slate-500 font-medium">Identificar inputs en pasarelas no convencionales de forma inteligente</span>
+                <span className="font-extrabold text-slate-200 block">Auto-Envío del Formulario (Instant Submit)</span>
+                <span className="text-[10px] text-slate-500 font-medium">Hacer clic en Pagar / Subscribe inmediatamente después de inyectar datos</span>
               </div>
               <input
                 type="checkbox"
@@ -218,14 +218,14 @@ export const OptionsPage: React.FC = () => {
             {/* Gateway Compatibility Matrix */}
             <div className="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Pasarelas Compatibles Verificadas:
+                Pasarelas Soportadas en Tiempo Real:
               </span>
               <div className="flex flex-wrap gap-1.5 font-mono text-[10px]">
                 <span className="px-2 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800/40">● Stripe</span>
-                <span className="px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 border border-blue-800/40">● OnlyFans</span>
-                <span className="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/40">● Shopify</span>
-                <span className="px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800/40">● Braintree</span>
                 <span className="px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/40">● Adyen</span>
+                <span className="px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800/40">● Braintree</span>
+                <span className="px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 border border-blue-800/40">● Xsolla</span>
+                <span className="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/40">● FastSpring</span>
                 <span className="px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/40">● WooCommerce</span>
               </div>
             </div>
@@ -242,7 +242,7 @@ export const OptionsPage: React.FC = () => {
               onClick={handleTriggerAiFormScan}
               className="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs py-3.5 rounded-xl shadow-lg transition-all uppercase tracking-wider flex items-center justify-center gap-2"
             >
-              <Zap className="w-4 h-4 text-amber-300 animate-bounce" /> ESCANEAR Y RESOLVER FORMULARIO ACTIVO CON IA
+              <Zap className="w-4 h-4 text-amber-300 animate-bounce" /> ESCANEAR Y TESTEAR PAGO EN PESTAÑA ACTIVA
             </button>
           </div>
         </div>

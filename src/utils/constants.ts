@@ -41,6 +41,8 @@ export const STORAGE_KEYS = {
   AUTOFILL_ENABLED: 'CODEX_autofill_enabled',
   AUDIO_NOTIFICATIONS: 'CODEX_audio_notifications',
   SUPPRESS_SAVE_CARD_PROMPT: 'CODEX_suppress_save_card_prompt',
+  CAPTCHA_AUTOCLICK_ENABLED: 'CODEX_captcha_autoclick_enabled',
+  TOAST_FAST_DISMISS: 'CODEX_toast_fast_dismiss',
 
   // AI Engine
   AI_HEURISTIC_MODE: 'CODEX_ai_heuristic_mode',

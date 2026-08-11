@@ -2,13 +2,14 @@
  * CODEX(R) System — Floating Toast Notification System
  *
  * Displays high-visibility, ultra-sleek floating toasts in the top-right corner.
- * Features an intelligent queue manager that automatically prevents toast stacking/overlapping
- * by limiting active notifications and instantly transitioning previous card status updates.
+ * Features an intelligent queue manager that automatically prevents toast stacking/overlapping.
+ * When a new card starts testing, the previous DECLINED toast smoothly slides down and disappears in 1 second.
  */
 
 export class ToastNotification {
   private static container: HTMLDivElement | null = null;
   private static activeToasts: HTMLElement[] = [];
+  private static lastDeclinedToast: HTMLElement | null = null;
 
   private static ensureContainer(): HTMLDivElement {
     if (this.container && document.body.contains(this.container)) {
@@ -50,7 +51,7 @@ export class ToastNotification {
         align-items: center;
         gap: 12px;
         font-size: 12px;
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .toast-card.declined {
         border-left: 4px solid #f43f5e;
@@ -103,12 +104,16 @@ export class ToastNotification {
         font-weight: 600;
       }
       @keyframes toastSlideIn {
-        from { opacity: 0; transform: translateX(30px) scale(0.95); }
+        from { opacity: 0; transform: translateX(40px) scale(0.92); }
         to { opacity: 1; transform: translateX(0) scale(1); }
       }
-      @keyframes toastSlideOut {
+      @keyframes toastSlideOutDown {
+        from { opacity: 1; transform: translateY(0) scale(1); }
+        to { opacity: 0; transform: translateY(25px) scale(0.9); }
+      }
+      @keyframes toastSlideOutRight {
         from { opacity: 1; transform: translateX(0) scale(1); }
-        to { opacity: 0; transform: translateX(30px) scale(0.92); }
+        to { opacity: 0; transform: translateX(40px) scale(0.9); }
       }
     `;
 
@@ -124,18 +129,38 @@ export class ToastNotification {
   }
 
   /**
-   * Dismisses previous info/declined toasts to prevent stacking/crossing on screen.
+   * Smoothly dismisses the previous DECLINED toast (slides down & disappears in 1 second)
+   */
+  private static dismissPreviousDeclined(): void {
+    if (this.lastDeclinedToast && this.lastDeclinedToast.parentNode) {
+      const target = this.lastDeclinedToast;
+      this.lastDeclinedToast = null;
+
+      // Animate slide down
+      target.style.animation = 'toastSlideOutDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+      setTimeout(() => {
+        const idx = this.activeToasts.indexOf(target);
+        if (idx !== -1) this.activeToasts.splice(idx, 1);
+        if (target.parentNode) {
+          target.parentNode.removeChild(target);
+        }
+      }, 400);
+    }
+  }
+
+  /**
+   * Prunes older info toasts to keep max 2 visible
    */
   private static pruneToasts(): void {
     while (this.activeToasts.length >= 2) {
       const oldest = this.activeToasts.shift();
       if (oldest && oldest.parentNode) {
-        oldest.style.animation = 'toastSlideOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        oldest.style.animation = 'toastSlideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
         setTimeout(() => {
           if (oldest.parentNode) {
             oldest.parentNode.removeChild(oldest);
           }
-        }, 200);
+        }, 300);
       }
     }
   }
@@ -149,17 +174,18 @@ export class ToastNotification {
     type?: 'info' | 'success' | 'declined' | 'threeds';
     icon?: string;
     durationMs?: number;
-  }): void {
+  }): HTMLElement | null {
     try {
       const container = this.ensureContainer();
-
       const type = options.type || 'info';
       const icon = options.icon || (type === 'success' ? '🎉' : type === 'declined' ? '❌' : type === 'threeds' ? '⚠️' : '💳');
 
-      // Prune previous toasts if type is info or declined to avoid overlap
-      if (type === 'info' || type === 'declined') {
-        this.pruneToasts();
+      // If starting a new card test (info), dismiss the previous DECLINED toast after 1s
+      if (type === 'info') {
+        this.dismissPreviousDeclined();
       }
+
+      this.pruneToasts();
 
       const card = document.createElement('div');
       card.className = `toast-card ${type}`;
@@ -189,20 +215,29 @@ export class ToastNotification {
       container.appendChild(card);
       this.activeToasts.push(card);
 
-      const duration = options.durationMs || (type === 'success' ? 6000 : 2500);
+      if (type === 'declined') {
+        this.lastDeclinedToast = card;
+      }
+
+      const duration = options.durationMs || (type === 'success' ? 6000 : 3500);
 
       setTimeout(() => {
-        card.style.animation = 'toastSlideOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-        setTimeout(() => {
-          const idx = this.activeToasts.indexOf(card);
-          if (idx !== -1) this.activeToasts.splice(idx, 1);
-          if (card.parentNode) {
-            card.parentNode.removeChild(card);
-          }
-        }, 200);
+        if (card.parentNode && card !== this.lastDeclinedToast) {
+          card.style.animation = 'toastSlideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+          setTimeout(() => {
+            const idx = this.activeToasts.indexOf(card);
+            if (idx !== -1) this.activeToasts.splice(idx, 1);
+            if (card.parentNode) {
+              card.parentNode.removeChild(card);
+            }
+          }, 300);
+        }
       }, duration);
+
+      return card;
     } catch (e) {
       console.warn('[CODEX(R)] Error showing toast:', e);
+      return null;
     }
   }
 
@@ -219,7 +254,7 @@ export class ToastNotification {
       description: `${masked} | ${month}/${year} | CVV ${card.cvc}`,
       type: 'info',
       icon: '💳',
-      durationMs: 2000,
+      durationMs: 3000,
     });
   }
 
@@ -232,7 +267,7 @@ export class ToastNotification {
       description: `${maskedCard} — ${reason || 'Declinada / Error'}`,
       type: 'declined',
       icon: '❌',
-      durationMs: 2200,
+      durationMs: 3500,
     });
   }
 
