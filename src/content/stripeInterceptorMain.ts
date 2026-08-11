@@ -8,7 +8,7 @@ function initStealth() {
     Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => undefined, configurable: true });
   }
 
-  // ── Anti-Radar Telemetry Spoofing (m.stripe.com/6) ──
+  // ── Anti-Radar Telemetry Spoofing v2 (m.stripe.com/6) ──
   const generateGuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
@@ -21,16 +21,58 @@ function initStealth() {
     sid: generateGuid(),
   };
 
+  // Spoof localStorage Stripe Radar tokens
   try {
     const origSetItem = localStorage.setItem.bind(localStorage);
     localStorage.setItem = function (key: string, val: string) {
-      if (key.includes('stripe') || key.includes('muid') || key.includes('guid')) {
+      if (key.includes('stripe') || key.includes('muid') || key.includes('guid') || key.includes('sid')) {
         return origSetItem(key, generateGuid());
       }
       return origSetItem(key, val);
     };
   } catch {}
 
+  // ── Hardware Fingerprint Masking ──
+  try {
+    // 1. Hardware Concurrency & Memory
+    Object.defineProperty(Navigator.prototype, 'hardwareConcurrency', { get: () => 8, configurable: true });
+    Object.defineProperty(Navigator.prototype, 'deviceMemory', { get: () => 8, configurable: true });
+    Object.defineProperty(Navigator.prototype, 'languages', { get: () => ['es-ES', 'es', 'en-US', 'en'], configurable: true });
+    Object.defineProperty(Navigator.prototype, 'plugins', {
+      get: () => [
+        { name: 'PDF Viewer', filename: 'internal-pdf-viewer', description: 'Portable Document Format' },
+        { name: 'Chrome PDF Viewer', filename: 'mhjfbdefakjhcfjhgbbhclfifbdfbcbp', description: '' }
+      ],
+      configurable: true
+    });
+
+    // 2. Screen & Color Depth
+    Object.defineProperty(Screen.prototype, 'colorDepth', { get: () => 24, configurable: true });
+    Object.defineProperty(Screen.prototype, 'pixelDepth', { get: () => 24, configurable: true });
+
+    // 3. AudioContext Fingerprint Noise Injection
+    if (window.AudioContext || (window as any).webkitAudioContext) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const origCreateAnalyser = AudioCtx.prototype.createAnalyser;
+      AudioCtx.prototype.createAnalyser = function() {
+        const analyser = origCreateAnalyser.call(this);
+        const origGetFloatFreq = analyser.getFloatFrequencyData.bind(analyser);
+        analyser.getFloatFrequencyData = function(array: any) {
+          origGetFloatFreq(array);
+          if (array && array.length) {
+            for (let i = 0; i < array.length; i += 10) {
+              array[i] += (Math.random() - 0.5) * 0.0001;
+            }
+          }
+        };
+        return analyser;
+      };
+    }
+  } catch (e) {
+    console.warn('[CODEX STEALTH] Hardware spoofing notice:', e);
+  }
+
+  // ── WebGL & Canvas Noise ──
   const getParam = (orig: Function) => {
     return function(this: any, param: number) {
       if (param === 0x9245) return 'Google Inc. (NVIDIA)';

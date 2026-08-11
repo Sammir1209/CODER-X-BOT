@@ -15,6 +15,7 @@ import type { CardFixture } from '../types/testCase';
 import type { DetectedField } from '../types/checkout';
 import type { IdentitySettings } from '../types/checkout';
 import { DEFAULT_IDENTITY } from '../types/checkout';
+import { ensureCompleteIdentity } from '../utils/identityGenerator';
 import { querySelectorIncludingShadow } from '../utils/domHelper';
 
 // ─── Country and State Maps for Select Dropdowns ────────────────────────────────
@@ -272,14 +273,14 @@ export function fillCheckoutForm(
     });
   } catch (e) {}
 
-  const id = identity || DEFAULT_IDENTITY;
+  const id = ensureCompleteIdentity(identity || DEFAULT_IDENTITY);
 
-  const nameToFill = randomNames ? getRandomName() : (id.billingName || 'John Doe');
+  const nameToFill = randomNames ? getRandomName() : id.billingName;
   const randomAddr = getRandomAddress();
-  const addressToFill = randomAddresses ? randomAddr.address1 : (id.address1 || '742 Evergreen Terrace');
-  const cityToFill = randomAddresses ? randomAddr.city : (id.city || 'Springfield');
-  const stateToFill = randomAddresses ? randomAddr.state : (id.state || 'IL');
-  const zipToFill = randomAddresses ? randomAddr.zipCode : (id.zipCode || '10001');
+  const addressToFill = randomAddresses ? randomAddr.address1 : id.address1;
+  const cityToFill = randomAddresses ? randomAddr.city : id.city;
+  const stateToFill = randomAddresses ? randomAddr.state : (id.state || '');
+  const zipToFill = randomAddresses ? randomAddr.zipCode : (id.zipCode || '');
 
   for (const field of fields) {
     const input = querySelectorIncludingShadow(field.selector) as HTMLInputElement | HTMLSelectElement | null;
@@ -291,20 +292,46 @@ export function fillCheckoutForm(
         break;
  
        case 'expiry': {
-         // Format as MMYY for combined fields
+         // Try MM/YY, MM/YYYY, MMYY
          const monthStr = fixture.expiryMonth.padStart(2, '0');
-         const yearStr = fixture.expiryYear.toString().slice(-2);
-         setNativeInputValue(input, `${monthStr}${yearStr}`, 'expiry');
+         const yearStr2 = fixture.expiryYear.toString().slice(-2);
+
+         if (input.tagName.toLowerCase() === 'select') {
+           setNativeInputValue(input, monthStr, 'expiryMonth');
+         } else {
+           // Try setting full string if placeholder mentions '/'
+           const placeholder = (input.getAttribute('placeholder') || '').toLowerCase();
+           const valToSet = placeholder.includes('/') ? `${monthStr}/${yearStr2}` : `${monthStr}${yearStr2}`;
+           setNativeInputValue(input, valToSet, 'expiry');
+         }
          break;
        }
- 
-       case 'expiryMonth':
-         setNativeInputValue(input, fixture.expiryMonth.padStart(2, '0'), 'expiryMonth');
+
+       case 'expiryMonth': {
+         const m2 = fixture.expiryMonth.padStart(2, '0');
+         const m1 = parseInt(fixture.expiryMonth, 10).toString();
+         if (input.tagName.toLowerCase() === 'select') {
+           const selectEl = input as HTMLSelectElement;
+           const hasOpt2 = Array.from(selectEl.options).some(o => o.value === m2 || o.textContent?.trim() === m2);
+           setNativeInputValue(input, hasOpt2 ? m2 : m1, 'expiryMonth');
+         } else {
+           setNativeInputValue(input, m2, 'expiryMonth');
+         }
          break;
- 
-       case 'expiryYear':
-         setNativeInputValue(input, fixture.expiryYear, 'expiryYear');
+       }
+
+       case 'expiryYear': {
+         const y4 = fixture.expiryYear.toString();
+         const y2 = y4.slice(-2);
+         if (input.tagName.toLowerCase() === 'select') {
+           const selectEl = input as HTMLSelectElement;
+           const hasOpt4 = Array.from(selectEl.options).some(o => o.value === y4 || o.textContent?.trim() === y4);
+           setNativeInputValue(input, hasOpt4 ? y4 : y2, 'expiryYear');
+         } else {
+           setNativeInputValue(input, y2, 'expiryYear');
+         }
          break;
+       }
  
        case 'cvc':
          setNativeInputValue(input, fixture.cvc, 'cvc');

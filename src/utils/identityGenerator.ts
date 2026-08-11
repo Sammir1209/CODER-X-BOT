@@ -187,7 +187,69 @@ const COUNTRY_DATA: Record<string, CountryIdentityData> = {
     ],
     phoneFormat: '7700######',
   },
+
+  // Canada
+  CA: {
+    firstNames: ['Liam', 'Noah', 'Jackson', 'Lucas', 'Logan', 'Benjamin', 'Jacob', 'William', 'Oliver', 'James', 'Olivia', 'Emma', 'Charlotte', 'Sophia', 'Aria', 'Ava', 'Chloe', 'Zoe', 'Amelia', 'Hannah'],
+    lastNames: ['Smith', 'Brown', 'Tremblay', 'Martin', 'Roy', 'Wilson', 'Macdonald', 'Johnson', 'Taylor', 'Campbell', 'Anderson', 'Jones', 'Miller', 'Gagnon', 'Lee', 'White', 'Bernier', 'Richard', 'Williams', 'Bouchard'],
+    streetNames: ['Yonge Street', 'Queen Street', 'King Street', 'Bloor Street', 'Jasper Avenue', 'Robson Street', 'Main Street', 'Ste-Catherine Street'],
+    cities: [
+      { name: 'Toronto', state: 'ON', zipPattern: 'M5V 2##' },
+      { name: 'Montreal', state: 'QC', zipPattern: 'H3B 1##' },
+      { name: 'Vancouver', state: 'BC', zipPattern: 'V6B 1##' },
+      { name: 'Calgary', state: 'AB', zipPattern: 'T2P 1##' },
+      { name: 'Ottawa', state: 'ON', zipPattern: 'K1P 1##' },
+    ],
+    phoneFormat: '416555####',
+  },
+
+  // Italy
+  IT: {
+    firstNames: ['Leonardo', 'Francesco', 'Alessandro', 'Lorenzo', 'Mattia', 'Andrea', 'Gabriele', 'Riccardo', 'Tommaso', 'Edoardo', 'Sofia', 'Giulia', 'Aurora', 'Alice', 'Ginevra', 'Emma', 'Giorgia', 'Greta', 'Beatrice', 'Anna'],
+    lastNames: ['Rossi', 'Russo', 'Ferrari', 'Esposito', 'Bianchi', 'Romano', 'Colombo', 'Ricci', 'Marino', 'Greco', 'Bruno', 'Gallo', 'Conti', 'De Luca', 'Mancini', 'Costa', 'Giordano', 'Rizzo', 'Lombardi', 'Moretti'],
+    streetNames: ['Via Roma', 'Corso Vittorio Emanuele', 'Via Dante', 'Via Garibaldi', 'Corso Buenos Aires', 'Via Nazionale', 'Via del Corso'],
+    cities: [
+      { name: 'Roma', state: 'Lazio', zipPattern: '001##' },
+      { name: 'Milano', state: 'Lombardia', zipPattern: '201##' },
+      { name: 'Napoli', state: 'Campania', zipPattern: '801##' },
+      { name: 'Torino', state: 'Piemonte', zipPattern: '101##' },
+      { name: 'Firenze', state: 'Toscana', zipPattern: '501##' },
+    ],
+    phoneFormat: '339#######',
+  },
+
+  // Australia
+  AU: {
+    firstNames: ['Oliver', 'Noah', 'William', 'Jack', 'Leo', 'Henry', 'Charlie', 'Thomas', 'Lucas', 'Archie', 'Charlotte', 'Amelia', 'Isla', 'Olivia', 'Mia', 'Grace', 'Willow', 'Harper', 'Chloe', 'Ella'],
+    lastNames: ['Smith', 'Jones', 'Williams', 'Brown', 'Wilson', 'Taylor', 'Johnson', 'White', 'Martin', 'Anderson', 'Thompson', 'Nguyen', 'Thomas', 'Walker', 'Harris', 'Lee', 'Ryan', 'Robinson', 'Kelly', 'King'],
+    streetNames: ['George Street', 'Bourke Street', 'Collins Street', 'Pitt Street', 'Flinders Street', 'Queen Street', 'Swanston Street'],
+    cities: [
+      { name: 'Sydney', state: 'NSW', zipPattern: '200#' },
+      { name: 'Melbourne', state: 'VIC', zipPattern: '300#' },
+      { name: 'Brisbane', state: 'QLD', zipPattern: '400#' },
+      { name: 'Perth', state: 'WA', zipPattern: '600#' },
+      { name: 'Adelaide', state: 'SA', zipPattern: '500#' },
+    ],
+    phoneFormat: '412######',
+  },
 };
+
+export const COUNTRIES_WITH_FLAGS = [
+  { code: 'US', name: 'United States', flag: '🇺🇸', label: '🇺🇸 EE.UU. (United States)' },
+  { code: 'ES', name: 'Spain', flag: '🇪🇸', label: '🇪🇸 España' },
+  { code: 'MX', name: 'Mexico', flag: '🇲🇽', label: '🇲🇽 México' },
+  { code: 'CO', name: 'Colombia', flag: '🇨🇴', label: '🇨🇴 Colombia' },
+  { code: 'PE', name: 'Peru', flag: '🇵🇪', label: '🇵🇪 Perú' },
+  { code: 'AR', name: 'Argentina', flag: '🇦🇷', label: '🇦🇷 Argentina' },
+  { code: 'CL', name: 'Chile', flag: '🇨🇱', label: '🇨🇱 Chile' },
+  { code: 'BR', name: 'Brazil', flag: '🇧🇷', label: '🇧🇷 Brasil' },
+  { code: 'CA', name: 'Canada', flag: '🇨🇦', label: '🇨🇦 Canadá' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', label: '🇬🇧 Reino Unido' },
+  { code: 'DE', name: 'Germany', flag: '🇩🇪', label: '🇩🇪 Alemania' },
+  { code: 'FR', name: 'France', flag: '🇫🇷', label: '🇫🇷 Francia' },
+  { code: 'IT', name: 'Italy', flag: '🇮🇹', label: '🇮🇹 Italia' },
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', label: '🇦🇺 Australia' },
+];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -222,8 +284,11 @@ function normalizeCountryCode(country: string): string {
   if (c === 'AR' || c.includes('ARGENTINA')) return 'AR';
   if (c === 'CL' || c.includes('CHILE')) return 'CL';
   if (c === 'BR' || c.includes('BRASIL') || c.includes('BRAZIL')) return 'BR';
+  if (c === 'CA' || c.includes('CANADÁ') || c.includes('CANADA')) return 'CA';
   if (c === 'FR' || c.includes('FRANCIA') || c.includes('FRANCE')) return 'FR';
   if (c === 'DE' || c.includes('ALEMANIA') || c.includes('GERMANY')) return 'DE';
+  if (c === 'IT' || c.includes('ITALIA') || c.includes('ITALY')) return 'IT';
+  if (c === 'AU' || c.includes('AUSTRALIA')) return 'AU';
   if (c === 'GB' || c.includes('REINO UNIDO') || c.includes('UNITED KINGDOM') || c.includes('UK')) return 'GB';
 
   return 'US'; // Default fallback

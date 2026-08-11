@@ -5,24 +5,7 @@ import { storageSet, storageGetMultiple } from '../../utils/storageAdapter';
 import { STORAGE_KEYS } from '../../utils/constants';
 import type { IdentitySettings } from '../../types/checkout';
 import { DEFAULT_IDENTITY } from '../../types/checkout';
-import { generateRandomIdentity, ensureCompleteIdentity } from '../../utils/identityGenerator';
-
-const COUNTRIES = [
-  'United States',
-  'Canada',
-  'United Kingdom',
-  'Spain',
-  'Mexico',
-  'Colombia',
-  'Argentina',
-  'Chile',
-  'Brazil',
-  'Peru',
-  'Germany',
-  'France',
-  'Italy',
-  'Australia',
-];
+import { generateRandomIdentity, ensureCompleteIdentity, COUNTRIES_WITH_FLAGS } from '../../utils/identityGenerator';
 
 export const OptionsPage: React.FC = () => {
   // Automation & AI states
@@ -399,21 +382,44 @@ export const OptionsPage: React.FC = () => {
 
               <div>
                 <label className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mb-1">
-                  <Globe className="w-3 h-3 text-indigo-400" /> País (escribe cualquiera):
+                  <Globe className="w-3 h-3 text-indigo-400" /> País de Identidad & ZIP AVS:
                 </label>
-                <input
-                  type="text"
-                  list="country-suggestions-options"
+                <select
                   value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  placeholder="Ej: United States, México, España..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 font-medium"
-                />
-                <datalist id="country-suggestions-options">
-                  {COUNTRIES.map((c) => (
-                    <option key={c} value={c} />
+                  onChange={(e) => {
+                    const newCountry = e.target.value;
+                    setCountry(newCountry);
+                    // If fields are empty or user switched country, fill missing fields with new country data
+                    const updated = ensureCompleteIdentity({
+                      email,
+                      billingName,
+                      phone,
+                      address1,
+                      address2,
+                      city,
+                      state,
+                      country: newCountry,
+                      zipCode,
+                    });
+                    if (!billingName) setBillingName(updated.billingName);
+                    if (!email) setEmail(updated.email);
+                    if (!phone) setPhone(updated.phone || '');
+                    if (!address1) setAddress1(updated.address1);
+                    if (!city) setCity(updated.city);
+                    if (!state) setState(updated.state || '');
+                    if (!zipCode) setZipCode(updated.zipCode || '');
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                >
+                  {COUNTRIES_WITH_FLAGS.map((c) => (
+                    <option key={c.code} value={c.name} className="bg-slate-900 text-slate-100">
+                      {c.label}
+                    </option>
                   ))}
-                </datalist>
+                </select>
+                <span className="text-[9px] text-indigo-400 font-medium block mt-1">
+                  ✨ <i>Los campos dejados en blanco se autogenerarán con ZIP, ciudad y datos reales de este país.</i>
+                </span>
               </div>
             </div>
 
