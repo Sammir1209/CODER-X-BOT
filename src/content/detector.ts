@@ -91,6 +91,8 @@ function detectProvider(): ProviderDetection {
   else if (win.AdyenCheckout || win.adyen) detectedProvider = 'adyen';
   else if (win.braintree) detectedProvider = 'braintree';
   else if (win.paypal) detectedProvider = 'paypal';
+  else if (win.Xsolla || win.xsolla) detectedProvider = 'xsolla';
+  else if (win.FastSpring || win.fastspring) detectedProvider = 'fastspring';
 
   // ── 2. Script-based detection ──
   if (detectedProvider === 'generic') {
@@ -110,6 +112,12 @@ function detectProvider(): ProviderDetection {
       } else if (src.includes('adyen.com')) {
         detectedProvider = 'adyen';
         break;
+      } else if (src.includes('xsolla.com')) {
+        detectedProvider = 'xsolla';
+        break;
+      } else if (src.includes('fastspring.com')) {
+        detectedProvider = 'fastspring';
+        break;
       } else if (src.includes('airwallex.com')) {
         detectedProvider = 'airwallex';
         break;
@@ -125,10 +133,12 @@ function detectProvider(): ProviderDetection {
 
   // ── 3. DOM & Class / Data attribute detection ──
   if (detectedProvider === 'generic') {
-    const pageText = (document.body ? document.body.innerHTML : '').slice(0, 5000).toLowerCase();
+    const pageText = (document.body ? document.body.innerHTML : '').slice(0, 8000).toLowerCase();
     if (pageText.includes('adyen') || pageText.includes('adyen-checkout')) detectedProvider = 'adyen';
     else if (pageText.includes('stripe-elements') || pageText.includes('data-stripe')) detectedProvider = 'stripe';
     else if (pageText.includes('braintree')) detectedProvider = 'braintree';
+    else if (pageText.includes('xsolla')) detectedProvider = 'xsolla';
+    else if (pageText.includes('fastspring')) detectedProvider = 'fastspring';
   }
 
   // ── 4. iframe-based detection ──
@@ -147,6 +157,12 @@ function detectProvider(): ProviderDetection {
     } else if (identifiers.includes('adyen')) {
       hasProtectedIframe = true;
       detectedProvider = 'adyen';
+    } else if (identifiers.includes('xsolla')) {
+      hasProtectedIframe = true;
+      detectedProvider = 'xsolla';
+    } else if (identifiers.includes('fastspring')) {
+      hasProtectedIframe = true;
+      detectedProvider = 'fastspring';
     } else if (identifiers.includes('braintree') || identifiers.includes('paypal')) {
       hasProtectedIframe = true;
       detectedProvider = identifiers.includes('braintree') ? 'braintree' : 'paypal';
@@ -159,7 +175,7 @@ function detectProvider(): ProviderDetection {
     } else if (identifiers.includes('recurly')) {
       hasProtectedIframe = true;
       detectedProvider = 'recurly';
-    } else if (identifiers.includes('checkout') || identifiers.includes('payment') || identifiers.includes('card')) {
+    } else if (identifiers.includes('checkout') || identifiers.includes('payment') || identifiers.includes('card') || identifiers.includes('pay')) {
       hasProtectedIframe = true;
     }
   }

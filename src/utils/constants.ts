@@ -106,6 +106,8 @@ export const SUPPORTED_PROVIDERS = [
   'airwallex',
   'square',
   'recurly',
+  'xsolla',
+  'fastspring',
   'generic',
 ] as const;
 
