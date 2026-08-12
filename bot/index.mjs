@@ -45,6 +45,7 @@ const COMMAND_MAP = {
   '/help':      handleHelp,
   '/ayuda':     handleHelp,
   '/ref':       handleRefCommand,
+  '/refe':      handleRefCommand,
 };
 
 // ─── Update Processor ────────────────────────────────────────────────────────
@@ -58,32 +59,41 @@ export async function processUpdate(update) {
       const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
       const username = from.username ? `@${from.username}` : '';
 
+      console.log(`[BOT] Mensaje recibido de ${name} (${userId}${username ? ' ' + username : ''}): "${text.slice(0, 100)}"`);
+
       // Register/update user silently — never let this crash the handler
       try {
         getOrRegisterUser(userId, { name, username });
       } catch (regErr) {
-        console.error('[BOT] Error registering user:', regErr.message);
+        console.error('[BOT] Error al registrar usuario en base de datos:', regErr);
       }
 
-      const cmd = text.split(/\s+/)[0].toLowerCase().replace(/@.*$/, '');
-      const handler = COMMAND_MAP[cmd];
+      if (text.startsWith('/')) {
+        const cmd = text.split(/\s+/)[0].toLowerCase().replace(/@.*$/, '');
+        const handler = COMMAND_MAP[cmd];
 
-      if (handler) {
-        try {
-          await handler(msg);
-        } catch (cmdErr) {
-          console.error(`[BOT] Error in handler for ${cmd}:`, cmdErr.message);
+        if (handler) {
+          console.log(`[BOT] Ejecutando comando: ${cmd}`);
+          try {
+            await handler(msg);
+          } catch (cmdErr) {
+            console.error(`[BOT] Error crítico ejecutando handler de ${cmd}:`, cmdErr);
+          }
+        } else {
+          console.log(`[BOT] Comando no reconocido: ${cmd}`);
         }
       }
     } else if (update.callback_query) {
+      const cb = update.callback_query;
+      console.log(`[BOT] Callback query recibida de ${cb.from?.username || cb.from?.id}: "${cb.data}"`);
       try {
-        await handleCallbackQuery(update.callback_query);
+        await handleCallbackQuery(cb);
       } catch (cbErr) {
-        console.error('[BOT] Error in callback handler:', cbErr.message);
+        console.error('[BOT] Error en callback handler:', cbErr);
       }
     }
   } catch (fatalErr) {
-    console.error('[BOT] Fatal error processing update:', fatalErr.message);
+    console.error('[BOT] Error fatal procesando update:', fatalErr);
   }
 }
 
