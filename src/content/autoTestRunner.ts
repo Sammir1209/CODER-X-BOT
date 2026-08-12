@@ -218,19 +218,31 @@ export class AutoTestRunner {
       await this.saveProgress();
 
       try {
-        // ── Step 1: Fill fields on top frame ──
+        // ── Step 1: Fill fields on all frames via background broadcast ──
         const detection = detectCheckoutFields();
         if (detection.provider) {
           addActivityLog('GATEWAY', `Pasarela detectada en la página: ${detection.provider.toUpperCase()}`);
         }
 
-        fillCheckoutForm(
-          detection.fields,
-          card.fixture,
-          this.identity,
-          this.randomNames,
-          this.randomAddresses
-        );
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+          await chrome.runtime.sendMessage({
+            action: 'BROADCAST_FILL_FORM',
+            payload: {
+              fixture: card.fixture,
+              identity: this.identity,
+              randomNames: this.randomNames,
+              randomAddresses: this.randomAddresses,
+            }
+          }).catch(() => {});
+        } else {
+          fillCheckoutForm(
+            detection.fields,
+            card.fixture,
+            this.identity,
+            this.randomNames,
+            this.randomAddresses
+          );
+        }
 
         addActivityLog('INFO', `Formulario rellenado con datos de ${card.fixture.cardholderName || 'QA Test User'}`, undefined, maskedCard);
 
@@ -243,7 +255,16 @@ export class AutoTestRunner {
 
         // ── Step 4: Submit form ──
         addActivityLog('INFO', 'Enviando formulario de checkout...', undefined, maskedCard);
-        const submitted = submitCheckoutForm();
+        let submitted = false;
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+          const response = await chrome.runtime.sendMessage({
+            action: 'BROADCAST_SUBMIT_FORM',
+          }).catch(() => null);
+          submitted = response?.data?.submitted ?? false;
+        } else {
+          submitted = submitCheckoutForm();
+        }
+
         if (!submitted) {
           this.tryFallbackSubmit();
         }

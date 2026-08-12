@@ -113,6 +113,32 @@ export function setupMessageRouter(): void {
         sendResponse({ success: true });
         break;
 
+      // ── Broadcast Form Actions ──
+      case 'BROADCAST_FILL_FORM': {
+        const activeTabId = tabId || sender.tab?.id;
+        if (activeTabId) {
+          broadcastToTab(activeTabId, {
+            action: 'FILL_FORM',
+            payload: message.payload,
+          }).then((res) => sendResponse({ success: true, data: res }));
+          return true;
+        }
+        sendResponse({ success: false, error: 'No active tab found' });
+        break;
+      }
+
+      case 'BROADCAST_SUBMIT_FORM': {
+        const activeTabId = tabId || sender.tab?.id;
+        if (activeTabId) {
+          broadcastToTab(activeTabId, {
+            action: 'SUBMIT_FORM',
+          }).then((res) => sendResponse({ success: true, data: res }));
+          return true;
+        }
+        sendResponse({ success: false, error: 'No active tab found' });
+        break;
+      }
+
       // ── Unknown ──
       default:
         sendResponse({ success: false, error: `Unknown action: ${action}` });
@@ -120,4 +146,29 @@ export function setupMessageRouter(): void {
 
     return true; // Always return true for async compatibility
   });
+}
+
+// Helper to send messages to all frames of a tab
+async function broadcastToTab(tabId: number, message: Record<string, unknown>): Promise<unknown> {
+  if (typeof chrome !== 'undefined' && chrome.webNavigation) {
+    return new Promise((resolve) => {
+      chrome.webNavigation.getAllFrames({ tabId }, async (frames) => {
+        if (!frames || frames.length === 0) {
+          const res = await chrome.tabs.sendMessage(tabId, message).catch(() => null);
+          return resolve(res);
+        }
+
+        let lastSuccessRes: unknown = null;
+        for (const frame of frames) {
+          try {
+            const res = await chrome.tabs.sendMessage(tabId, message, { frameId: frame.frameId });
+            if (res) lastSuccessRes = res;
+          } catch {}
+        }
+        resolve(lastSuccessRes);
+      });
+    });
+  } else {
+    return chrome.tabs.sendMessage(tabId, message).catch(() => null);
+  }
 }
