@@ -343,16 +343,14 @@ export async function fillCheckoutForm(
         break;
  
        case 'expiry': {
-         // Try MM/YY, MM/YYYY, MMYY
+         // MM/YY format (always include slash for inputs as some formatters require it explicitly)
          const monthStr = fixture.expiryMonth.padStart(2, '0');
          const yearStr2 = fixture.expiryYear.toString().slice(-2);
 
          if (input.tagName.toLowerCase() === 'select') {
            setNativeInputValue(input, monthStr, 'expiryMonth');
          } else {
-           // Try setting full string if placeholder mentions '/'
-           const placeholder = (input.getAttribute('placeholder') || '').toLowerCase();
-           const valToSet = placeholder.includes('/') ? `${monthStr}/${yearStr2}` : `${monthStr}${yearStr2}`;
+           const valToSet = `${monthStr}/${yearStr2}`;
            await simulateTyping(input as HTMLInputElement, valToSet);
          }
          break;
@@ -389,23 +387,23 @@ export async function fillCheckoutForm(
          break;
  
        case 'cardholderName':
-         setNativeInputValue(input, nameToFill, 'cardholderName');
+         await simulateTyping(input as HTMLInputElement, nameToFill);
          break;
  
        case 'email':
-         setNativeInputValue(input, id.email || 'user@example.com', 'email');
+         await simulateTyping(input as HTMLInputElement, id.email || 'user@example.com');
          break;
  
        case 'phone':
-         setNativeInputValue(input, id.phone || '9145550192', 'phone');
+         await simulateTyping(input as HTMLInputElement, id.phone || '9145550192');
          break;
  
        case 'zipCode':
-         setNativeInputValue(input, zipToFill, 'zipCode');
+         await simulateTyping(input as HTMLInputElement, zipToFill);
          break;
  
        case 'address1':
-         setNativeInputValue(input, addressToFill, 'address1');
+         await simulateTyping(input as HTMLInputElement, addressToFill);
          break;
  
        case 'address2':
