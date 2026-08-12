@@ -14,6 +14,7 @@
  */
 
 import type { PaymentResultStatus } from '../types/checkout';
+import { activePreset } from './messaging';
 
 export interface ResultObserverCallback {
   (result: PaymentResultStatus, durationMs: number, details?: string): void;
@@ -184,9 +185,6 @@ export class CheckoutObserver {
 
     const pageText = document.body?.innerText || '';
     
-    // Import activePreset to inject specialized target filters
-    const { activePreset } = require('./messaging');
-
     // ── 3. SUCCESS text signals ──
     const successPatterns = [
       /payment\s*(was\s*)?successful/i,
