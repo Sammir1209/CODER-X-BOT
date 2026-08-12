@@ -241,6 +241,10 @@ export class CheckoutObserver {
       /invalid/i,
       /incorrect/i,
       /refused/i,
+      /la\s*informaci[oó]n\s*indicada\s*no\s*es\s*v[aá]lida/i,
+      /informaci[oó]n\s*indicada\s*no\s*es\s*v[aá]lida/i,
+      /informaci[oó]n\s*no\s*v[aá]lida/i,
+      /no\s*es\s*v[aá]lid/i,
     ];
 
     if (declinedPatterns.some(p => p.test(pageText))) {

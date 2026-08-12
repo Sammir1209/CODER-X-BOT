@@ -81,6 +81,18 @@ export async function sendMessage(chatId, text, extra = {}) {
   return result;
 }
 
+// ─── Send Photo ──────────────────────────────────────────────────────────────
+export async function sendPhoto(chatId, photo, caption = '', extra = {}) {
+  const truncatedCaption = caption.length > 1000 ? caption.slice(0, 997) + '...' : caption;
+  return apiCall('sendPhoto', {
+    chat_id: chatId,
+    photo,
+    caption: truncatedCaption,
+    parse_mode: 'HTML',
+    ...extra,
+  });
+}
+
 // ─── Send Document (ZIP file) ────────────────────────────────────────────────
 export async function sendDocument(chatId, filePath, caption = '', extra = {}) {
   // Truncate caption to 1024 chars (Telegram limit for document captions)

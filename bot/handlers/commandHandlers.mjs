@@ -1,6 +1,6 @@
 import { existsSync, statSync } from 'fs';
 import { execSync } from 'child_process';
-import { DIST_DIR, ROOT_DIR, ZIP_PATH } from '../config/constants.mjs';
+import { DIST_DIR, ROOT_DIR, ZIP_PATH, OWNER_1_LINK, OWNER_2_LINK } from '../config/constants.mjs';
 import { EMOJI } from '../templates/emojis.mjs';
 import { getActivePlanKeyboard, getNoPlanKeyboard } from '../templates/keymaps.mjs';
 import {
@@ -27,7 +27,7 @@ import {
   saveUsersDb,
   syncUserToSupabase
 } from '../database/userStore.mjs';
-import { sendDocument, sendMessage } from '../services/telegramApi.mjs';
+import { sendDocument, sendMessage, sendPhoto } from '../services/telegramApi.mjs';
 
 export async function handleRegister(msg) {
   const chatId = String(msg.chat.id);
@@ -483,4 +483,72 @@ export async function handleBroadcastCommand(msg) {
     `• Fallidos/Bloqueados: <code>${failCount}</code>\n` +
     `• Total destinatarios: <code>${users.length}</code>`
   );
+}
+
+export async function handleRefCommand(msg) {
+  const chatId = String(msg.chat.id);
+  const from = msg.from || {};
+  const username = from.username ? `@${from.username}` : `@${from.first_name || 'User'}`;
+  
+  let photoFileId = null;
+  let description = '';
+
+  const text = (msg.text || '').trim();
+  const caption = (msg.caption || '').trim();
+
+  // Case A: Image sent directly with /ref caption
+  if (msg.photo && msg.photo.length > 0) {
+    photoFileId = msg.photo[msg.photo.length - 1].file_id;
+    description = caption.replace(/^\/ref\s*/i, '').trim();
+  }
+  // Case B: Replied to an image with /ref text
+  else if (msg.reply_to_message && msg.reply_to_message.photo && msg.reply_to_message.photo.length > 0) {
+    photoFileId = msg.reply_to_message.photo[msg.reply_to_message.photo.length - 1].file_id;
+    description = text.replace(/^\/ref\s*/i, '').trim();
+  }
+
+  if (!photoFileId) {
+    const usage = 
+      `<b>${EMOJI.CROSS} ERROR DE REFERENCIA</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `Debes enviar una imagen con el comando <code>/ref [descripción]</code> en el pie de foto, ` +
+      `o responder a una imagen existente con el comando <code>/ref [descripción]</code>.`;
+    await sendMessage(chatId, usage);
+    return;
+  }
+
+  // Format date: 12 August 2026
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const d = new Date();
+  const dateStr = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+  const captionText = 
+    `˗ˏˋ ★ ˎˊ˗ | New Reference! CODER(X) PROJECT\n` +
+    `╺╺╺╺╺╺╺╺╺╺╺╺\n` +
+    `‹ な › Mensaje: <b>${description || 'Sin descripción'}</b>\n` +
+    `‹ な › Username: ${username}\n` +
+    `‹ な › Fecha: <b>${dateStr}</b>\n` +
+    `╺╺╺╺╺╺╺╺╺╺╺╺\n` +
+    `‹ な › Group Chat: <a href="https://t.me/+hasGJOtQgg1lZGFk">@Chat</a>`;
+
+  const inlineKeyboard = {
+    inline_keyboard: [
+      [
+        { text: "Owner ☁", url: OWNER_1_LINK },
+        { text: "Admin ⚡", url: OWNER_2_LINK }
+      ]
+    ]
+  };
+
+  const targetChannel = '@code_cave_hunt';
+  const res = await sendPhoto(targetChannel, photoFileId, captionText, { reply_markup: inlineKeyboard });
+
+  if (res && res.ok) {
+    await sendMessage(chatId, `<b>${EMOJI.CHECK} REFERENCIA PUBLICADA</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nTu referencia ha sido enviada con éxito al canal <code>${targetChannel}</code>.`);
+  } else {
+    await sendMessage(chatId, `<b>${EMOJI.CROSS} ERROR</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nNo se pudo publicar la referencia en <code>${targetChannel}</code>. Asegúrate de que el bot sea administrador del canal y tenga permisos para publicar.`);
+  }
 }

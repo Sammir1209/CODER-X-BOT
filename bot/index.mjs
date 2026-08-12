@@ -14,7 +14,8 @@ import {
   handleRemoveVipCommand,
   handleStart,
   handleStatus,
-  handleVipCommand
+  handleVipCommand,
+  handleRefCommand
 } from './handlers/commandHandlers.mjs';
 import { getOrRegisterUser } from './database/userStore.mjs';
 
@@ -43,14 +44,15 @@ const COMMAND_MAP = {
   '/zip':       handleExtension,
   '/help':      handleHelp,
   '/ayuda':     handleHelp,
+  '/ref':       handleRefCommand,
 };
 
 // ─── Update Processor ────────────────────────────────────────────────────────
 export async function processUpdate(update) {
   try {
-    if (update.message && update.message.text) {
+    if (update.message) {
       const msg = update.message;
-      const text = msg.text.trim();
+      const text = (msg.text || msg.caption || '').trim();
       const from = msg.from || {};
       const userId = String(from.id || msg.chat.id);
       const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Operador';
