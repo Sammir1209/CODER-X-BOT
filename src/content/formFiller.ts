@@ -156,6 +156,51 @@ function setNativeInputValue(
 }
 
 /**
+ * Simulates typing a string character-by-character.
+ * Triggers keydown, keypress, value assignment, input, keyup events
+ * with 15ms delays to satisfy input formatters (like Cleave.js or payment masks).
+ */
+async function simulateTyping(inputEl: HTMLInputElement, value: string): Promise<void> {
+  inputEl.focus();
+
+  const prototype = Object.getPrototypeOf(inputEl);
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value') ||
+                     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+
+  if (descriptor?.set) {
+    descriptor.set.call(inputEl, '');
+  } else {
+    inputEl.value = '';
+  }
+  inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+  for (const char of value) {
+    const keydownEvent = new KeyboardEvent('keydown', { key: char, code: `Digit${char}`, bubbles: true });
+    const keypressEvent = new KeyboardEvent('keypress', { key: char, bubbles: true });
+    inputEl.dispatchEvent(keydownEvent);
+    inputEl.dispatchEvent(keypressEvent);
+
+    const currentVal = inputEl.value + char;
+    if (descriptor?.set) {
+      descriptor.set.call(inputEl, currentVal);
+    } else {
+      inputEl.value = currentVal;
+    }
+
+    const inputEvent = new InputEvent('input', { data: char, inputType: 'insertText', bubbles: true });
+    inputEl.dispatchEvent(inputEvent);
+
+    const keyupEvent = new KeyboardEvent('keyup', { key: char, code: `Digit${char}`, bubbles: true });
+    inputEl.dispatchEvent(keyupEvent);
+
+    await new Promise(r => setTimeout(r, 15));
+  }
+
+  inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+  inputEl.dispatchEvent(new Event('blur', { bubbles: true }));
+}
+
+/**
  * Attempts to fill a field with retry logic.
  * Some fields require multiple attempts (lazy-loaded, React state sync).
  */
@@ -244,13 +289,13 @@ function getRandomAddress(): { address1: string; city: string; state: string; zi
 /**
  * Fills detected DOM fields with test fixture data and identity settings.
  */
-export function fillCheckoutForm(
+export async function fillCheckoutForm(
   fields: DetectedField[],
   fixture: CardFixture,
   identity?: IdentitySettings | null,
   randomNames = false,
   randomAddresses = false
-): void {
+): Promise<void> {
   // Clear leftover error styles and texts to prevent CheckoutObserver from triggering a false decline immediately
   try {
     const errorSelectors = [
@@ -294,7 +339,7 @@ export function fillCheckoutForm(
 
     switch (field.fieldType) {
       case 'cardNumber':
-        setNativeInputValue(input, fixture.number, 'cardNumber');
+        await simulateTyping(input as HTMLInputElement, fixture.number);
         break;
  
        case 'expiry': {
@@ -308,7 +353,7 @@ export function fillCheckoutForm(
            // Try setting full string if placeholder mentions '/'
            const placeholder = (input.getAttribute('placeholder') || '').toLowerCase();
            const valToSet = placeholder.includes('/') ? `${monthStr}/${yearStr2}` : `${monthStr}${yearStr2}`;
-           setNativeInputValue(input, valToSet, 'expiry');
+           await simulateTyping(input as HTMLInputElement, valToSet);
          }
          break;
        }
@@ -321,7 +366,7 @@ export function fillCheckoutForm(
            const hasOpt2 = Array.from(selectEl.options).some(o => o.value === m2 || o.textContent?.trim() === m2);
            setNativeInputValue(input, hasOpt2 ? m2 : m1, 'expiryMonth');
          } else {
-           setNativeInputValue(input, m2, 'expiryMonth');
+           await simulateTyping(input as HTMLInputElement, m2);
          }
          break;
        }
@@ -334,13 +379,13 @@ export function fillCheckoutForm(
            const hasOpt4 = Array.from(selectEl.options).some(o => o.value === y4 || o.textContent?.trim() === y4);
            setNativeInputValue(input, hasOpt4 ? y4 : y2, 'expiryYear');
          } else {
-           setNativeInputValue(input, y2, 'expiryYear');
+           await simulateTyping(input as HTMLInputElement, y2);
          }
          break;
        }
  
        case 'cvc':
-         setNativeInputValue(input, fixture.cvc, 'cvc');
+         await simulateTyping(input as HTMLInputElement, fixture.cvc);
          break;
  
        case 'cardholderName':

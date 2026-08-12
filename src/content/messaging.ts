@@ -47,29 +47,31 @@ export function setupContentScriptMessaging(): void {
 
       // ── Form Filling ──
       case 'FILL_FORM': {
-        try {
-          const payload = message.payload as FillFormPayload | undefined;
-          if (!payload?.fixture) {
-            sendResponse({ success: false, error: 'Missing fixture in FILL_FORM payload' });
-            break;
+        (async () => {
+          try {
+            const payload = message.payload as FillFormPayload | undefined;
+            if (!payload?.fixture) {
+              sendResponse({ success: false, error: 'Missing fixture in FILL_FORM payload' });
+              return;
+            }
+
+            invalidateDetectionCache();
+            const detection = detectCheckoutFields();
+            const identity: IdentitySettings = payload.identity || DEFAULT_IDENTITY;
+
+            await fillCheckoutForm(
+              detection.fields,
+              payload.fixture,
+              identity,
+              payload.randomNames ?? false,
+              payload.randomAddresses ?? false
+            );
+
+            sendResponse({ success: true });
+          } catch (err) {
+            sendResponse({ success: false, error: err instanceof Error ? err.message : String(err) });
           }
-
-          invalidateDetectionCache();
-          const detection = detectCheckoutFields();
-          const identity: IdentitySettings = payload.identity || DEFAULT_IDENTITY;
-
-          fillCheckoutForm(
-            detection.fields,
-            payload.fixture,
-            identity,
-            payload.randomNames ?? false,
-            payload.randomAddresses ?? false
-          );
-
-          sendResponse({ success: true });
-        } catch (err) {
-          sendResponse({ success: false, error: err instanceof Error ? err.message : String(err) });
-        }
+        })();
         break;
       }
 

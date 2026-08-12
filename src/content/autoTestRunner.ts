@@ -235,7 +235,7 @@ export class AutoTestRunner {
             }
           }).catch(() => {});
         } else {
-          fillCheckoutForm(
+          await fillCheckoutForm(
             detection.fields,
             card.fixture,
             this.identity,
