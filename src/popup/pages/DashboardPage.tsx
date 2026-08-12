@@ -46,18 +46,21 @@ export function DashboardPage() {
   const [binsText, setBinsText] = useState('');
   const [ccText, setCcText] = useState('');
   const [cardQuantity, setCardQuantity] = useState<number>(50);
-
-  // Estados del quick add eliminados
-
-  // Estado eliminado: savedHits
+  const [checkoutPreset, setCheckoutPreset] = useState<string>('generic');
 
   useEffect(() => {
-    getFromStorage(['CODEX_bins', 'CODEX_ccs', 'CODEX_active_source_mode'], (res: any) => {
+    getFromStorage(['CODEX_bins', 'CODEX_ccs', 'CODEX_active_source_mode', 'CODEX_checkout_preset'], (res: any) => {
       if (res.CODEX_bins) setBinsText(res.CODEX_bins);
       if (res.CODEX_ccs) setCcText(res.CODEX_ccs);
       if (res.CODEX_active_source_mode) setActiveSourceMode(res.CODEX_active_source_mode);
+      if (res.CODEX_checkout_preset) setCheckoutPreset(res.CODEX_checkout_preset);
     });
   }, []);
+
+  const handleSwitchPreset = (preset: string) => {
+    setCheckoutPreset(preset);
+    saveToStorage('CODEX_checkout_preset', preset);
+  };
 
   /**
    * Generates a Luhn-valid card number with random future expiry date and random CVV
@@ -179,34 +182,56 @@ export function DashboardPage() {
       {/* Upper Section: Mode Select & Textareas */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4">
         {/* SELECT MODE Panel */}
-        <div className="bg-[#0b0d14] border border-slate-900/60 rounded-xl p-4 shadow-lg flex flex-col h-full">
-          <div className="text-[10px] font-bold text-white uppercase tracking-widest border-l-2 border-slate-500 pl-2 mb-4">
-            SELECT MODE
+        <div className="bg-[#0b0d14] border border-slate-900/60 rounded-xl p-4 shadow-lg flex flex-col h-full justify-between">
+          <div>
+            <div className="text-[10px] font-bold text-white uppercase tracking-widest border-l-2 border-slate-500 pl-2 mb-4">
+              SELECT MODE
+            </div>
+            
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => handleSwitchMode('bin')}
+                className={`flex-1 py-3 px-2 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 ${
+                  activeSourceMode === 'bin'
+                    ? 'bg-slate-100 text-slate-900'
+                    : 'bg-[#05070a] border border-slate-800/60 text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${activeSourceMode === 'bin' ? 'bg-slate-900' : 'bg-slate-600'}`}></span>
+                BIN MODE
+              </button>
+              <button
+                onClick={() => handleSwitchMode('ccs')}
+                className={`flex-1 py-3 px-2 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 ${
+                  activeSourceMode === 'ccs'
+                    ? 'bg-slate-100 text-slate-900'
+                    : 'bg-[#05070a] border border-slate-800/60 text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${activeSourceMode === 'ccs' ? 'bg-slate-900' : 'bg-slate-600'}`}></span>
+                CC LIST
+              </button>
+            </div>
           </div>
-          
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleSwitchMode('bin')}
-              className={`flex-1 py-3 px-2 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 ${
-                activeSourceMode === 'bin'
-                  ? 'bg-slate-100 text-slate-900'
-                  : 'bg-[#05070a] border border-slate-800/60 text-slate-500 hover:text-slate-300'
-              }`}
+
+          <div>
+            <div className="text-[10px] font-bold text-white uppercase tracking-widest border-l-2 border-indigo-500 pl-2 mb-3">
+              CHECKOUT PRESET
+            </div>
+            <select
+              value={checkoutPreset}
+              onChange={(e) => handleSwitchPreset(e.target.value)}
+              className="w-full bg-[#05070a] border border-slate-800/60 rounded-lg p-2.5 text-[10px] text-slate-300 font-bold outline-none cursor-pointer focus:border-indigo-500 transition-all uppercase tracking-wider"
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${activeSourceMode === 'bin' ? 'bg-slate-900' : 'bg-slate-600'}`}></span>
-              BIN MODE
-            </button>
-            <button
-              onClick={() => handleSwitchMode('ccs')}
-              className={`flex-1 py-3 px-2 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 ${
-                activeSourceMode === 'ccs'
-                  ? 'bg-slate-100 text-slate-900'
-                  : 'bg-[#05070a] border border-slate-800/60 text-slate-500 hover:text-slate-300'
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${activeSourceMode === 'ccs' ? 'bg-slate-900' : 'bg-slate-600'}`}></span>
-              CC LIST
-            </button>
+              <option value="generic">GENERIC AUTO-DETECT</option>
+              <option value="canva">CANVA ADVANCED (ADYEN/TOKENEX)</option>
+              <option value="gamma">GAMMA CHECKOUT (STRIPE)</option>
+              <option value="chatgpt">CHATGPT / OPENAI (STRIPE)</option>
+              <option value="supercell">SUPERCELL (ADYEN SECURE)</option>
+            </select>
+            <p className="text-[9px] text-slate-500 mt-2 font-medium leading-relaxed uppercase tracking-wide">
+              Optimiza las heurísticas, selectores del DOM y patrones de rechazo para el sitio seleccionado.
+            </p>
           </div>
         </div>
 

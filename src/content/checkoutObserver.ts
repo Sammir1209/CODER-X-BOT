@@ -183,6 +183,9 @@ export class CheckoutObserver {
     }
 
     const pageText = document.body?.innerText || '';
+    
+    // Import activePreset to inject specialized target filters
+    const { activePreset } = require('./messaging');
 
     // ── 3. SUCCESS text signals ──
     const successPatterns = [
@@ -198,6 +201,16 @@ export class CheckoutObserver {
       /subscription\s*(activated|started|confirmed)/i,
       /suscripci[oó]n\s*(activada|confirmada)/i,
     ];
+
+    if (activePreset === 'canva') {
+      successPatterns.push(/canva\s*pro/i, /disfruta\s*de\s*canva/i, /bienvenido\s*a\s*canva/i);
+    } else if (activePreset === 'gamma') {
+      successPatterns.push(/gamma\s*pro/i, /welcome\s*to\s*gamma/i);
+    } else if (activePreset === 'chatgpt') {
+      successPatterns.push(/chatgpt\s*plus/i, /openai/i);
+    } else if (activePreset === 'supercell') {
+      successPatterns.push(/supercell\s*id/i, /pago\s*confirmado/i, /purchase\s*complete/i);
+    }
 
     if (successPatterns.some(p => p.test(pageText))) {
       return 'SUCCESS';
@@ -246,6 +259,12 @@ export class CheckoutObserver {
       /informaci[oó]n\s*no\s*v[aá]lida/i,
       /no\s*es\s*v[aá]lid/i,
     ];
+
+    if (activePreset === 'canva') {
+      declinedPatterns.push(/la\s*información\s*indicada\s*no\s*es\s*válida/i, /corregir\s*los\s*datos/i);
+    } else if (activePreset === 'chatgpt') {
+      declinedPatterns.push(/your\s*card\s*has\s*been\s*declined/i, /unable\s*to\s*process\s*payment/i);
+    }
 
     if (declinedPatterns.some(p => p.test(pageText))) {
       return 'DECLINED';

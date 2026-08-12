@@ -21,6 +21,25 @@ import { DEFAULT_IDENTITY } from '../types/checkout';
 
 let activeObserver: CheckoutObserver | null = null;
 
+export let activePreset = 'generic';
+
+// Synchronize preset with chrome storage
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+  chrome.storage.local.get(['CODEX_checkout_preset'], (res) => {
+    if (res.CODEX_checkout_preset) {
+      activePreset = res.CODEX_checkout_preset;
+      console.log('[CODER] Preset inicial cargado:', activePreset);
+    }
+  });
+
+  chrome.storage.onChanged.addListener((changes) => {
+    if (changes.CODEX_checkout_preset) {
+      activePreset = changes.CODEX_checkout_preset.newValue || 'generic';
+      console.log('[CODER] Preset cambiado a:', activePreset);
+    }
+  });
+}
+
 export function setupContentScriptMessaging(): void {
   if (typeof chrome === 'undefined' || !chrome.runtime) return;
 
